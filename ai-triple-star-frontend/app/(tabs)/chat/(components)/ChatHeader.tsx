@@ -16,10 +16,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ navigation, onOpenModal }) => {
       <Pressable
         style={styles.actionButton}
         onPress={() => {
-          console.log("chat!");
+          navigation.navigate("chat", { isNewChat: true });
         }}
       >
-        <Text style={styles.actionButtonText}>new chat</Text>
+        <Text style={styles.actionButtonText}>New Chat</Text>
       </Pressable>
     </View>
   );

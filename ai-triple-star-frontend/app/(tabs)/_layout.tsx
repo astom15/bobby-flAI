@@ -1,5 +1,5 @@
 import {
-  AntDesign,
+  Ionicons,
   MaterialIcons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
@@ -15,8 +15,12 @@ const TabLayout = () => {
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => (
-            <AntDesign size={28} name="home" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              size={28}
+              name={focused ? "home" : "home-outline"}
+              color={color}
+            />
           ),
           headerShown: false,
         }}
@@ -25,10 +29,10 @@ const TabLayout = () => {
         name="recipes"
         options={{
           title: "Recipes",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <MaterialCommunityIcons
               size={28}
-              name="food-outline"
+              name={focused ? "food" : "food-outline"}
               color={color}
             />
           ),
@@ -39,8 +43,12 @@ const TabLayout = () => {
         name="chat"
         options={{
           title: "Chat",
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons size={28} name="chat-bubble-outline" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialIcons
+              size={28}
+              name={focused ? "chat-bubble" : "chat-bubble-outline"}
+              color={color}
+            />
           ),
           headerShown: false,
         }}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { PreviousChatsModalProps } from "../../../types/chats";
 import {
   View,
@@ -14,6 +14,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import ChatSearchBar from "./ChatSearchBar";
+// import { ListItem } from "./ListItem";
 
 const { width } = Dimensions.get("window");
 
@@ -23,16 +25,19 @@ const PreviousChatsModal = ({
   chats,
   onSelect,
 }: PreviousChatsModalProps) => {
-  const translateX = useSharedValue(isVisible ? 0 : width);
+  const translateX = useSharedValue(isVisible ? 0 : -width);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
-
+  const [isScrollBarVisible, setIsScrollBarVisible] = useState(false);
   React.useEffect(() => {
     if (isVisible) {
-      translateX.value = withTiming(0, { duration: 300 });
+      translateX.value = withTiming(0, { duration: 500 }, () =>
+        setIsScrollBarVisible(true),
+      );
     } else {
-      translateX.value = withTiming(width, { duration: 300 });
+      setIsScrollBarVisible(false);
+      translateX.value = withTiming(-width, { duration: 500 });
     }
   }, [isVisible, translateX]);
 
@@ -44,18 +49,23 @@ const PreviousChatsModal = ({
       onRequestClose={onClose}
     >
       <View style={styles.container}>
-        <Animated.View style={[styles.container, animatedStyle]}>
-          <Text style={styles.header}>Chats</Text>
+        <Animated.View style={[styles.viewContent, animatedStyle]}>
+          <ChatSearchBar />
           <FlatList
             data={chats}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => onSelect(item)}>
+              <TouchableOpacity
+                style={styles.container}
+                onPress={() => onSelect(item)}
+              >
                 <Text style={styles.chatItem}>{item.name}</Text>
               </TouchableOpacity>
             )}
+            contentContainerStyle={styles.listContent}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={isScrollBarVisible}
           />
-          //need to close when selecting?
         </Animated.View>
       </View>
     </Modal>
@@ -65,9 +75,14 @@ const PreviousChatsModal = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 5,
     backgroundColor: "#fff",
-    justifyContent: "center",
+  },
+  viewContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    overflow: "hidden",
+    flex: 1,
   },
   header: {
     fontSize: 24,
@@ -76,9 +91,15 @@ const styles = StyleSheet.create({
   },
   chatItem: {
     fontSize: 18,
-    padding: 10,
+    paddingVertical: 5,
+    paddingLeft: 0,
+    paddingRight: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+  },
+
+  listContent: {
+    padding: 10,
   },
 });
 

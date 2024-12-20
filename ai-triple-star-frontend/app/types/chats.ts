@@ -9,3 +9,8 @@ export interface PreviousChatsModalProps {
   chats: Chat[];
   onSelect: (chat: Chat) => void;
 }
+
+export interface ChatContextType {
+  currentChat: Chat | null;
+  setCurrentChat: (chat: Chat | null) => void;
+}

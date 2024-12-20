@@ -5,11 +5,11 @@ import PreviousChatsModal from "./(components)/PreviousChats";
 import { Chat } from "../../types/chats";
 import ChatHeader from "./(components)/ChatHeader";
 
-const previousChats: Chat[] = [
-  { id: "1", name: "What can I make with cheese and eggs" },
-  { id: "2", name: "What's a good gnocchi recipe" },
-  { id: "3", name: "Burger King at home" },
-];
+const previousChats: Chat[] = Array(50)
+  .fill(0)
+  .map((_, i) => {
+    return { id: `${i}`, name: `${i} + ${i + 1}` };
+  });
 
 const ChatLayout = () => {
   const [isModalVisible, setModalVisible] = useState(false);

@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import PreviousChatsModal from "./(components)/PreviousChats";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Chat } from "../../types/chats";
+import { useLocalSearchParams } from "expo-router";
 
 const previousChats: Chat[] = [
   { id: "1", name: "What can I make with cheese and eggs" },
@@ -10,8 +11,15 @@ const previousChats: Chat[] = [
 ];
 
 const ChatBot = () => {
+  const { isNewChat } = useLocalSearchParams();
   const [isModalVisible, setModalVisible] = useState(false);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
+
+  useEffect(() => {
+    if (isNewChat) {
+      setCurrentChat(null);
+    }
+  }, [isNewChat]);
 
   const handleChatSelect = (chat: Chat) => {
     setCurrentChat(chat);
@@ -48,8 +56,8 @@ const ChatBot = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     justifyContent: "flex-start",
+    padding: 10,
     alignItems: "center",
   },
   header: {
