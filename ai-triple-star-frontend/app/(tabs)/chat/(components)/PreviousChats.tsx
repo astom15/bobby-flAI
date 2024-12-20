@@ -1,21 +1,13 @@
-import React, { useRef, useState } from "react";
-import { PreviousChatsModalProps } from "../../../types/chats";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  FlatList,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Chat, PreviousChatsModalProps } from "../../../types/chats";
+import { View, StyleSheet, Modal, FlatList, Dimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
 import ChatSearchBar from "./ChatSearchBar";
-// import { ListItem } from "./ListItem";
+import { ListItem } from "./ListItem";
 
 const { width } = Dimensions.get("window");
 
@@ -25,28 +17,38 @@ const PreviousChatsModal = ({
   chats,
   onSelect,
 }: PreviousChatsModalProps) => {
+  const [isScrollBarVisible, setIsScrollBarVisible] = useState(false);
   const translateX = useSharedValue(isVisible ? 0 : -width);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
-  const [isScrollBarVisible, setIsScrollBarVisible] = useState(false);
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (isVisible) {
       translateX.value = withTiming(0, { duration: 500 }, () =>
         setIsScrollBarVisible(true),
       );
-    } else {
-      setIsScrollBarVisible(false);
-      translateX.value = withTiming(-width, { duration: 500 });
     }
   }, [isVisible, translateX]);
+
+  const handleSelect = (item: Chat) => {
+    setIsScrollBarVisible(false);
+    translateX.value = withTiming(-width, { duration: 500 }, () => {
+      onClose();
+    });
+    onSelect(item);
+  };
 
   return (
     <Modal
       transparent
       visible={isVisible}
       animationType="none"
-      onRequestClose={onClose}
+      onRequestClose={() => {
+        translateX.value = withTiming(-width, { duration: 500 }, () => {
+          onClose();
+        });
+      }}
     >
       <View style={styles.container}>
         <Animated.View style={[styles.viewContent, animatedStyle]}>
@@ -55,12 +57,7 @@ const PreviousChatsModal = ({
             data={chats}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.container}
-                onPress={() => onSelect(item)}
-              >
-                <Text style={styles.chatItem}>{item.name}</Text>
-              </TouchableOpacity>
+              <ListItem item={item} onSelect={handleSelect} />
             )}
             contentContainerStyle={styles.listContent}
             scrollEventThrottle={16}
