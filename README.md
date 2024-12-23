@@ -1,2 +1,2 @@
-# ai-triple-star
+# bobby-flAI
 AI Cooking Assistant
