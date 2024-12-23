@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import PreviousChatsModal from "./(components)/PreviousChats";
 import { Chat } from "../../types/chats";
 import ChatHeader from "./(components)/ChatHeader";
+import React from "react";
 
 const previousChats: Chat[] = Array(50)
   .fill(0)

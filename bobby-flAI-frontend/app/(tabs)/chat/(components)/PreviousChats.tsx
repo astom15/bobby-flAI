@@ -31,12 +31,12 @@ const PreviousChatsModal = ({
     }
   }, [isVisible, translateX]);
 
-  const handleSelect = (item: Chat) => {
+  const handleSelect = (item?: Chat) => {
     setIsScrollBarVisible(false);
     translateX.value = withTiming(-width, { duration: 500 }, () => {
       onClose();
+      if (item) onSelect(item);
     });
-    onSelect(item);
   };
 
   return (
@@ -44,11 +44,7 @@ const PreviousChatsModal = ({
       transparent
       visible={isVisible}
       animationType="none"
-      onRequestClose={() => {
-        translateX.value = withTiming(-width, { duration: 500 }, () => {
-          onClose();
-        });
-      }}
+      onRequestClose={() => handleSelect}
     >
       <View style={styles.container}>
         <Animated.View style={[styles.viewContent, animatedStyle]}>
@@ -57,7 +53,7 @@ const PreviousChatsModal = ({
             data={chats}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <ListItem item={item} onSelect={handleSelect} />
+              <ListItem item={item} onSelect={() => handleSelect(item)} />
             )}
             contentContainerStyle={styles.listContent}
             scrollEventThrottle={16}
