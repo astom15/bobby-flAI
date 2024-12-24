@@ -42,7 +42,7 @@ const ChatBot = () => {
     console.log("get message: ", message);
   };
   return (
-    <View style={[defaultStyles.pageContainer, { backgroundColor: "red" }]}>
+    <View style={[defaultStyles.pageContainer]}>
       <PreviousChatsModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
