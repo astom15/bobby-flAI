@@ -1,4 +1,4 @@
-import Colors from "../../../constants/Colors";
+import Colors from "../../../utils/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { View, TextInput, StyleSheet, Platform } from "react-native";

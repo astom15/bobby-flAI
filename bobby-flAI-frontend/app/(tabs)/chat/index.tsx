@@ -1,8 +1,20 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import PreviousChatsModal from "./(components)/PreviousChats";
 import React, { useEffect, useState } from "react";
 import { Chat } from "../../types/chats";
 import { useLocalSearchParams } from "expo-router";
+// eslint-disable-next-line import/no-unresolved
+import MessageInput from "@/app/components/MessageInput";
+// eslint-disable-next-line import/no-unresolved
+import { defaultStyles } from "@/app/utils/Styles";
 
 const previousChats: Chat[] = [
   { id: "1", name: "What can I make with cheese and eggs" },
@@ -26,8 +38,17 @@ const ChatBot = () => {
     setModalVisible(false);
   };
 
+  const getCompleteMessage = async (message: string) => {
+    console.log("get message: ", message);
+  };
   return (
-    <View style={styles.container}>
+    <View style={[defaultStyles.pageContainer, { backgroundColor: "red" }]}>
+      <PreviousChatsModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        chats={previousChats}
+        onSelect={handleChatSelect}
+      />
       {currentChat ? (
         <>
           <Text style={styles.header}>{currentChat.name} </Text>
@@ -43,23 +64,18 @@ const ChatBot = () => {
           <Text style={styles.header}>Let's Start Cooking</Text>
         </>
       )}
-      <PreviousChatsModal
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        chats={previousChats}
-        onSelect={handleChatSelect}
-      />
+      <KeyboardAvoidingView
+        style={[styles.keyboardStyle]}
+        keyboardVerticalOffset={60}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <MessageInput onShouldSendMessage={getCompleteMessage} />
+      </KeyboardAvoidingView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    padding: 10,
-    alignItems: "center",
-  },
   header: {
     fontSize: 24,
     fontWeight: "bold",
@@ -71,6 +87,13 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "black",
     textAlign: "center",
+  },
+  keyboardStyle: {
+    position: "absolute",
+    width: "100%",
+    left: 0,
+    bottom: 0,
+    //flexShrink: 0,
   },
 });
 

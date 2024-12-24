@@ -1,12 +1,8 @@
 import { Redirect } from "expo-router";
+import React from "react";
 
 const HomePage = () => {
-  return (
-    // <Stack>
-    //   <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    // </Stack>
-    <Redirect href="/home" />
-  );
+  return <Redirect href="/home" />;
 };
 
 export default HomePage;

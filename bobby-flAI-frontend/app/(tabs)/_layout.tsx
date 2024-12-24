@@ -4,12 +4,17 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import React from "react";
+import Colors from "../utils/Colors";
 
 const TabLayout = () => {
   return (
     <Tabs
       initialRouteName="home"
-      screenOptions={{ tabBarActiveTintColor: "green" }}
+      screenOptions={{
+        tabBarActiveTintColor: "green",
+        tabBarStyle: { backgroundColor: Colors.light },
+      }}
     >
       <Tabs.Screen
         name="home"

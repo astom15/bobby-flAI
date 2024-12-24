@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import ChatSearchBar from "./ChatSearchBar";
-import { ListItem } from "./ListItem";
+import ListItem from "./ListItem";
 
 const { width } = Dimensions.get("window");
 

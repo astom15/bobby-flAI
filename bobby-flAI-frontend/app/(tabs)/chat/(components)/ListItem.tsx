@@ -18,7 +18,6 @@ const ListItem: React.FC<ListItemProps> = React.memo(({ item, onSelect }) => {
 });
 ListItem.displayName = "ListItem";
 
-export { ListItem };
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -34,3 +33,5 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ddd",
   },
 });
+
+export default ListItem;
