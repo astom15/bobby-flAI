@@ -41,7 +41,8 @@ const DUMMY_MESSAGES: Message[] = [
   },
   {
     role: Role.user,
-    content: "I need to cook something with these ingredients",
+    content:
+      "I need to cook something with these ingredients. I'm hungry af and need to eat something delicious, nutritious, and that will satiate me.",
   },
 ];
 const ChatBot = () => {
@@ -90,7 +91,10 @@ const ChatBot = () => {
         <FlashList
           data={messages}
           estimatedItemSize={400}
-          contentContainerStyle={{ paddingTop: 30, paddingBottom: 150 }}
+          contentContainerStyle={{
+            paddingTop: 20,
+            paddingBottom: 150,
+          }}
           keyboardDismissMode="on-drag"
           renderItem={({ item }) => <ChatMessage {...item} />}
         />
