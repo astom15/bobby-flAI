@@ -9,7 +9,7 @@ const startServer = async () => {
         const mongoDb = await initializeMongoDB();
         app.use(createDBContextMiddleware(pgPool, mongoDb));
         app.listen(PORT, () => {
-            console.log("Server running at http://localhost:" + process.env.MONGO_PORT);
+            console.log("Server running at http://localhost:" + PORT);
         });
 
         process.on("SIGINT", async () => {

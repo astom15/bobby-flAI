@@ -8,9 +8,18 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"resolveJsonModule": true,
-		"typeRoots": ["./node_modules/@types", "types"],
-		"types": ["node", "express"]
+		"typeRoots": ["types", "node_modules/@types"],
+		"types": ["node", "express"],
+		"baseUrl": ".",
+		"paths": {
+			"*": ["node_modules/*", "./*"]
+		}
 	},
-	"include": ["./"],
+	"include": [
+		"*.ts",
+		"routes/**/*.ts",
+		"controllers/**/*.ts",
+		"models/**/*.ts"
+	],
 	"exclude": ["node_modules", "dist"]
 }

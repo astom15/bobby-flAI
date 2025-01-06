@@ -1,4 +1,4 @@
-import pg from "pg";
+import pg, {Pool} from "pg";
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
 dotenv.config();
@@ -8,7 +8,7 @@ const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
 const mongoDBName = "cookbook";
 const mongoClient = new MongoClient(uri);
 // PG
-const pgPool = new pg.Pool({
+const pgPool: Pool = new pg.Pool({
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
     database: process.env.PG_DATABASE,

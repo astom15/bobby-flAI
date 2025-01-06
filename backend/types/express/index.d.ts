@@ -7,9 +7,8 @@ declare global {
 			context: {
 				pgPool: Pool;
 				mongoDb: Db;
-			};
+			} ;
 		}
 	}
 }
-
-export {}; 
+export { };
