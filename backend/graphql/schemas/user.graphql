@@ -1,0 +1,32 @@
+type User {
+	id: ID!
+	name: String!
+	email: String!
+	imageUrl: String
+	allergies: [String!]!
+	preferences: [String!]!
+	countryCode: String
+	region: String
+	favorites: [Recipe!]!
+	chats: [Chat!]!
+}
+
+input EditUserInput {
+	name: String
+	email: String
+	imageUrl: String
+	allergies: [String!]
+	preferences: [String!]
+	countryCode: String
+	region: String
+}
+
+type Query {
+	getUser(id: ID!): User
+}
+
+type Mutation {
+	createUser(name: String!, email: String!, password: String!): User!
+	deleteUser(id: ID!): Boolean!
+	editUser(user: EditUserInput!): User!
+}

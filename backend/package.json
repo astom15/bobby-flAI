@@ -5,34 +5,49 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node dist/server.js",
-		"dev": "nodemon",
+		"dev": "tsx watch server.ts",
 		"build": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint . --ext .ts,.js",
 		"lint:fix": "eslint . --ext .ts,.js --fix",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"migrate": "npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datasource prisma/schema.prisma --script > down.sql && npx prisma migrate dev"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"@apollo/server": "^4.11.3",
+		"@prisma/client": "^6.1.0",
+		"@types/bcrypt": "^5.0.2",
 		"aws-sdk": "^2.1692.0",
+		"bcrypt": "^5.1.1",
+		"cors": "^2.8.5",
 		"dotenv": "^16.4.7",
 		"express": "^4.21.2",
+		"graphql": "^16.10.0",
+		"graphql-tag": "^2.12.6",
 		"mongodb": "^6.12.0",
 		"pg": "^8.13.1"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.17.0",
+		"@graphql-eslint/eslint-plugin": "^4.3.0",
+		"@graphql-tools/merge": "^9.0.17",
+		"@graphql-tools/webpack-loader": "^7.0.0",
+		"@types/cors": "^2.8.17",
 		"@types/express": "^5.0.0",
+		"@types/node": "^22.10.5",
 		"@types/pg": "^8.11.10",
 		"eslint": "^9.17.0",
 		"eslint-config-prettier": "^9.1.0",
 		"globals": "^15.14.0",
-		"nodemon": "^3.1.9",
 		"prettier": "^3.4.2",
+		"prisma": "^6.1.0",
 		"ts-node": "^10.9.2",
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.2",
 		"typescript-eslint": "^8.19.0"
 	}
 }

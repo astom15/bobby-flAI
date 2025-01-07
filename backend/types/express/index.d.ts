@@ -1,14 +1,14 @@
-import { Pool } from "pg";
+import { PrismaClient } from "@prisma/client";
 import { Db } from "mongodb";
 
 declare global {
 	namespace Express {
 		interface Request {
 			context: {
-				pgPool: Pool;
-				mongoDb: Db;
-			} ;
+				prisma?: PrismaClient;
+				mongoDb?: Db;
+			};
 		}
 	}
 }
-export { };
+export {};

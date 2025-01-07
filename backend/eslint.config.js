@@ -1,12 +1,31 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import eslintConfigPrettier from "eslint-config-prettier"
+import graphqlPlugin from "@graphql-eslint/eslint-plugin";
 
-export default [
-  {files: ["**/*.{js,mjs,cjs,ts}"]},
-  { languageOptions: { globals: globals.node } },
-  eslintConfigPrettier,
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-];
+export default tseslint.config(
+	{
+		ignores: [
+			"dist/", // exclude specific folder
+			"**/*.js", // exclude all JavaScript files
+		],
+	},
+	{
+		files: ["**/*.ts"],
+		extends: [eslint.configs.recommended, ...tseslint.configs.strict],
+	},
+	{
+		files: ["**/*.graphql"],
+		languageOptions: {
+			parser: graphqlPlugin.parser,
+			parserOptions: {
+				schema: "./schema.graphql", // Path to the static merged schema file
+			},
+		},
+		plugins: {
+			"@graphql-eslint": graphqlPlugin,
+		},
+		rules: {
+			"@graphql-eslint/known-type-names": "error",
+		},
+	}
+);
