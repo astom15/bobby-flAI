@@ -1,3 +1,5 @@
+import { PrismaClient } from "@prisma/client";
+import { Connection } from "mongoose";
 declare global {
 	namespace Express {
 		interface Request {

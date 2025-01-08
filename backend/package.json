@@ -5,13 +5,13 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node dist/server.js",
-		"dev": "tsx watch --include graphql/schemas/**/*.graphql server.ts ",
+		"dev": "tsx watch --include src/graphql/schemas/**/*.graphql --include src/graphql/resolvers/**/*.ts --include src/models/**/*.ts  --include src/controllers/**/*.ts  --include src/routes/**/*.ts --include src/services/**/*.ts server.ts ",
 		"build": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint . --ext .ts,.js",
 		"lint:fix": "eslint . --ext .ts,.js --fix",
 		"clean": "rm -rf dist",
-		"migrate": "npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datasource prisma/schema.prisma --script > down.sql && npx prisma migrate dev && npx prisma generate"
+		"migrate": "npx prisma migrate diff --from-schema-datamodel src/prisma/schema.prisma --to-schema-datasource src/prisma/schema.prisma --script > down.sql && npx prisma migrate dev && npx prisma generate"
 	},
 	"keywords": [],
 	"author": "",

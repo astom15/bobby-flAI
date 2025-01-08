@@ -19,16 +19,10 @@
 	},
 	"include": [
 		"*.ts",
-		"routes/**/*.ts",
-		"controllers/**/*.ts",
-		"models/**/*.ts",
+		"src/**/*.ts",
 		"db.ts",
-		"scripts/**/*.ts",
-		"migrations/**/*.ts",
-		"seeders/**/*.ts",
-		"config/**/*",
-		"graphql/**/*.ts",
-		"**/*.graphql"
+		"src/graphql/**/*.ts",
+		"src/**/*.graphql"
 	],
 	"exclude": ["node_modules", "dist"]
 }

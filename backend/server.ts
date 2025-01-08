@@ -6,9 +6,9 @@ import {
 	expressMiddleware,
 } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import typeDefs from "graphql/schemas";
-import resolvers from "graphql/resolvers/index.resolver";
-import chatRouter from "routes/chat";
+import typeDefs from "src/graphql/schemas";
+import resolvers from "src/graphql/resolvers/index.resolver";
+import chatRouter from "src/routes/chat";
 import http from "http";
 
 const PORT = 4000;
@@ -47,12 +47,22 @@ const startServer = async () => {
 		app.use("/chats", chatRouter);
 		await new Promise<void>((resolve) => httpServer.listen(PORT, resolve));
 		console.log(`Server running at http://localhost:${PORT}/graphql`);
+		process.removeAllListeners("SIGINT");
 		process.on("SIGINT", async () => {
 			console.log("Shutting down gracefully...");
-			await prisma.$disconnect();
-			await mongoDb.close();
-			console.log("Connections closed. Goodbye!");
-			process.exit(0);
+			try {
+				await Promise.race([
+					Promise.all([prisma.$disconnect(), mongoDb.close()]),
+					new Promise((_, reject) =>
+						setTimeout(() => reject(new Error("Cleanup timeout")), 5000)
+					),
+				]);
+				console.log("Connections closed. Goodbye!");
+			} catch (err) {
+				console.error("Error during cleanup:", err);
+			} finally {
+				process.exit(0);
+			}
 		});
 	} catch (err) {
 		console.error("Error starting the server:", err);

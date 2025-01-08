@@ -13,10 +13,7 @@ const prisma: PrismaClient = new PrismaClient();
 
 const initializeMongoDB = async () => {
 	try {
-		await mongoose.connect(mongoUri, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-		} as ConnectOptions);
+		await mongoose.connect(mongoUri);
 		const mongoDb: Connection = mongoose.connection;
 		mongoDb.on(
 			"error",

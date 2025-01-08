@@ -2,7 +2,7 @@ import { prisma } from "db";
 import { Prisma } from "@prisma/client";
 import { EditUserInput, ItemRemoval, UserAttributes } from "../../models/User";
 import bcrypt from "bcrypt";
-import { updateArrayItems } from "services/users.service";
+import { updateArrayItems } from "src/services/users.service";
 
 export const userResolvers = {
 	Query: {
