@@ -1,7 +1,8 @@
 import { prisma } from "db";
 import { Prisma } from "@prisma/client";
-import { EditUserInput, UserAttributes } from "../../models/User";
+import { EditUserInput, ItemRemoval, UserAttributes } from "../../models/User";
 import bcrypt from "bcrypt";
+import { updateArrayItems } from "services/users.service";
 
 export const userResolvers = {
 	Query: {
@@ -78,7 +79,11 @@ export const userResolvers = {
 		},
 		editUser: async (
 			_parent: unknown,
-			{ id, input }: { id: number; input: EditUserInput }
+			{
+				id,
+				input,
+				removalInput,
+			}: { id: number; input: EditUserInput; removalInput: ItemRemoval }
 		): Promise<Prisma.UsersUpdateInput> => {
 			try {
 				const user = await prisma.users.findUnique({ where: { id } });
@@ -86,21 +91,16 @@ export const userResolvers = {
 					throw new Error(`User ${id} not found.`);
 				}
 				const updatedData = { ...input };
-				// i have to handle specific removal of allergies, this just adds more every time.
-				if (input.allergies) {
-					const updatedAllergies = [
-						...(user.allergies || []),
-						...input.allergies,
-					];
-					updatedData.allergies = Array.from(new Set(updatedAllergies));
-				}
-				if (input.preferences) {
-					const updatedPrefs = [
-						...(user.preferences || []),
-						...input.preferences,
-					];
-					updatedData.preferences = Array.from(new Set(updatedPrefs));
-				}
+				updatedData.allergies = updateArrayItems(
+					user.allergies,
+					input?.allergies,
+					removalInput?.allergies
+				);
+				updatedData.preferences = updateArrayItems(
+					user.preferences,
+					input?.preferences,
+					removalInput?.preferences
+				);
 				const updatedUser = await prisma.users.update({
 					where: { id },
 					data: updatedData,

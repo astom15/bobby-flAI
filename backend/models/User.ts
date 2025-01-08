@@ -20,3 +20,8 @@ export interface EditUserInput {
 	countryCode?: string;
 	region?: string;
 }
+
+export interface ItemRemoval {
+	allergies?: string[];
+	preferences?: string[];
+}

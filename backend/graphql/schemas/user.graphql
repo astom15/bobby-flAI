@@ -14,11 +14,14 @@ input EditUserInput {
 	email: String
 	imageUrl: String
 	allergies: [String!]
-	allergiesToRemove: [String!]
 	preferences: [String!]
-	preferencesToRemove: [String!]
 	countryCode: String
 	region: String
+}
+
+input ItemRemoval {
+	allergies: [String!]
+	preferences: [String!]
 }
 
 type Query {
@@ -36,5 +39,5 @@ type Mutation {
 		region: String
 	): User!
 	deleteUser(id: Int!): Int!
-	editUser(id: Int!, input: EditUserInput!): User!
+	editUser(id: Int!, input: EditUserInput, removalInput: ItemRemoval): User!
 }
