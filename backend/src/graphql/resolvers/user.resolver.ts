@@ -8,7 +8,7 @@ export const userResolvers = {
 	Query: {
 		getUser: async (
 			_parent: unknown,
-			{ id }: { id: number }
+			{ id }: { id: string }
 		): Promise<UserAttributes | null> => {
 			try {
 				const user = await prisma.users.findUnique({
@@ -67,8 +67,8 @@ export const userResolvers = {
 		// cascade delete or should i just keep them and have a ghost ID
 		deleteUser: async (
 			_parent: unknown,
-			{ id }: { id: number }
-		): Promise<number> => {
+			{ id }: { id: string }
+		): Promise<string> => {
 			try {
 				const deletedUser = await prisma.users.delete({ where: { id } });
 				return deletedUser.id;
@@ -83,7 +83,7 @@ export const userResolvers = {
 				id,
 				input,
 				removalInput,
-			}: { id: number; input: EditUserInput; removalInput: ItemRemoval }
+			}: { id: string; input: EditUserInput; removalInput: ItemRemoval }
 		): Promise<Prisma.UsersUpdateInput> => {
 			try {
 				const user = await prisma.users.findUnique({ where: { id } });

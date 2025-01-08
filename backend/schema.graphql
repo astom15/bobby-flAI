@@ -25,13 +25,13 @@ input ItemRemoval {
 }
 
 type Query {
-  getUser(id: Int!): User
+  getUser(id: String!): User
 }
 
 type Mutation {
   createUser(name: String!, email: String!, password: String!, allergies: [String], preferences: [String], countryCode: String, region: String): User!
-  deleteUser(id: Int!): Int!
-  editUser(id: Int!, input: EditUserInput, removalInput: ItemRemoval): User!
+  deleteUser(id: String!): String!
+  editUser(id: String!, input: EditUserInput, removalInput: ItemRemoval): User!
 }
 
 schema {

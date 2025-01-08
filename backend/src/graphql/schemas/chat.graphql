@@ -1,0 +1,15 @@
+type Chat {
+	id: ID!
+	userId: ID!
+	name: String!
+	messages: [Message!]!
+}
+
+input NewChatInput {
+	userId: ID!
+}
+
+type Mutation {
+	createChat(input: NewChatInput!): Chat!
+	updateChat(id: ID!, name: String!): Chat!
+}

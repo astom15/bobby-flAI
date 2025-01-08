@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Users {
-  id  Int @id @default(autoincrement())
+  id  String @id @default(uuid())
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
   name String @db.VarChar(255) 
