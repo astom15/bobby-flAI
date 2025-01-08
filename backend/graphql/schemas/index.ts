@@ -4,7 +4,9 @@ import { print } from "graphql";
 import fs from "fs";
 
 // const isProd = process.env.NODE_ENV === "production";
-const userSchema = gql(fs.readFileSync("./user.graphql", "utf8"));
+const userSchema = gql(
+	fs.readFileSync("./graphql/schemas/user.graphql", "utf8")
+);
 
 //load appropriate config prod or dev
 // const envSchema = isProd

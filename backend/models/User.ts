@@ -2,7 +2,7 @@ export interface UserAttributes {
 	id: number;
 	name: string;
 	email: string;
-	imageUrl: string;
+	imageUrl: string | null;
 	allergies: string[];
 	preferences: string[];
 	countryCode: string;

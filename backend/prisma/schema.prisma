@@ -13,16 +13,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Users {
   id  Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name String @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+  name String @db.VarChar(255) 
   password String @db.VarChar(255)
   email String @unique @db.VarChar(255)
   allergies String[] @default([])
   preferences String[] @default([])
-  countryCode String @db.Char(2) @default("US")
-  region String? @db.Char(32)
-  imageUrl String @db.VarChar(255)
+  countryCode String @db.Char(2) @default("US") @map("countryCode")
+  region String? @db.Char(2) @default("CA")
+  imageUrl String? @db.VarChar(255) @map("imageUrl")
+
+  @@map("users") 
 }

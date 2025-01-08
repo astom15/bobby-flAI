@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "allergies" DROP DEFAULT,
+ALTER COLUMN "preferences" DROP DEFAULT,
+ALTER COLUMN "countryCode" DROP DEFAULT,
+ALTER COLUMN "region" SET NOT NULL;
+

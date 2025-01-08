@@ -1,19 +1,33 @@
 import dotenv from "dotenv";
-import { MongoClient } from "mongodb";
 import { PrismaClient } from "@prisma/client";
+import mongoose, { Connection, ConnectOptions } from "mongoose";
 dotenv.config();
 
 //Mongo connection
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
 const mongoDBName = "cookbook";
-const mongoClient = new MongoClient(uri);
+const mongoUri =
+	process.env.MONGODB_URI || `mongodb://localhost:27017/${mongoDBName}`;
+
 // PG
 const prisma: PrismaClient = new PrismaClient();
 
 const initializeMongoDB = async () => {
-	await mongoClient.connect();
-	console.log("Connected to MongoDB");
-	return mongoClient.db(mongoDBName);
+	try {
+		await mongoose.connect(mongoUri, {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		} as ConnectOptions);
+		const mongoDb: Connection = mongoose.connection;
+		mongoDb.on(
+			"error",
+			console.error.bind(console, "MongoDB connection error:")
+		);
+		mongoDb.once("open", () => console.log("MongoDB connected successfully."));
+		return mongoDb;
+	} catch (err) {
+		console.error("Failed to connect to mongo:", err);
+		throw err;
+	}
 };
 
-export { mongoClient, prisma, initializeMongoDB };
+export { prisma, initializeMongoDB };

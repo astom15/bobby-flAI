@@ -7,8 +7,6 @@ type User {
 	preferences: [String!]!
 	countryCode: String
 	region: String
-	favorites: [Recipe!]!
-	chats: [Chat!]!
 }
 
 input EditUserInput {
@@ -16,17 +14,27 @@ input EditUserInput {
 	email: String
 	imageUrl: String
 	allergies: [String!]
+	allergiesToRemove: [String!]
 	preferences: [String!]
+	preferencesToRemove: [String!]
 	countryCode: String
 	region: String
 }
 
 type Query {
-	getUser(id: ID!): User
+	getUser(id: Int!): User
 }
 
 type Mutation {
-	createUser(name: String!, email: String!, password: String!): User!
-	deleteUser(id: ID!): Boolean!
-	editUser(user: EditUserInput!): User!
+	createUser(
+		name: String!
+		email: String!
+		password: String!
+		allergies: [String]
+		preferences: [String]
+		countryCode: String
+		region: String
+	): User!
+	deleteUser(id: Int!): Int!
+	editUser(id: Int!, input: EditUserInput!): User!
 }

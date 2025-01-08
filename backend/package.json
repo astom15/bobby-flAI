@@ -5,13 +5,13 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node dist/server.js",
-		"dev": "tsx watch server.ts",
+		"dev": "tsx watch --include graphql/schemas/**/*.graphql server.ts ",
 		"build": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint . --ext .ts,.js",
 		"lint:fix": "eslint . --ext .ts,.js --fix",
 		"clean": "rm -rf dist",
-		"migrate": "npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datasource prisma/schema.prisma --script > down.sql && npx prisma migrate dev"
+		"migrate": "npx prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datasource prisma/schema.prisma --script > down.sql && npx prisma migrate dev && npx prisma generate"
 	},
 	"keywords": [],
 	"author": "",
@@ -29,6 +29,7 @@
 		"graphql": "^16.10.0",
 		"graphql-tag": "^2.12.6",
 		"mongodb": "^6.12.0",
+		"mongoose": "^8.9.3",
 		"pg": "^8.13.1"
 	},
 	"devDependencies": {
@@ -37,7 +38,7 @@
 		"@graphql-tools/merge": "^9.0.17",
 		"@graphql-tools/webpack-loader": "^7.0.0",
 		"@types/cors": "^2.8.17",
-		"@types/express": "^5.0.0",
+		"@types/graphql": "^14.2.3",
 		"@types/node": "^22.10.5",
 		"@types/pg": "^8.11.10",
 		"eslint": "^9.17.0",

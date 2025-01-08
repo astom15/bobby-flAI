@@ -1,9 +1,9 @@
 import express from "express";
 // import { ObjectId } from "mongodb";
-const router = express.Router();
+const chatRouter = express.Router();
 const CHAT_COLLECTION = "Chats";
 
-router.get("/", async (req, res) => {
+chatRouter.get("/", async (req, res) => {
 	const { mongoDb } = req.context;
 	try {
 		if (mongoDb) {
@@ -16,6 +16,6 @@ router.get("/", async (req, res) => {
 		res.status(500).json({ error: "Internal Server Error" });
 	}
 });
-export default router;
+export default chatRouter;
 //milk, eggs, fish, Crustacean shellfish, tree nuts, peanuts, wheat, and soybeans.
 //google geolocation API

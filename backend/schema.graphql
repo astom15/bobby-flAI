@@ -1,0 +1,37 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  imageUrl: String
+  allergies: [String!]!
+  preferences: [String!]!
+  countryCode: String
+  region: String
+}
+
+input EditUserInput {
+  name: String
+  email: String
+  imageUrl: String
+  allergies: [String!]
+  allergiesToRemove: [String!]
+  preferences: [String!]
+  preferencesToRemove: [String!]
+  countryCode: String
+  region: String
+}
+
+type Query {
+  getUser(id: Int!): User
+}
+
+type Mutation {
+  createUser(name: String!, email: String!, password: String!, allergies: [String], preferences: [String], countryCode: String, region: String): User!
+  deleteUser(id: Int!): Int!
+  editUser(id: Int!, input: EditUserInput!): User!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
