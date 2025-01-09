@@ -7,6 +7,12 @@ import fs from "fs";
 const userSchema = gql(
 	fs.readFileSync("./src/graphql/schemas/user.graphql", "utf8")
 );
+const messageSchema = gql(
+	fs.readFileSync("./src/graphql/schemas/message.graphql", "utf8")
+);
+const chatSchema = gql(
+	fs.readFileSync("./src/graphql/schemas/chat.graphql", "utf8")
+);
 
 //load appropriate config prod or dev
 // const envSchema = isProd
@@ -21,7 +27,7 @@ const userSchema = gql(
 // 			}
 // 		`;
 
-const typeDefs = mergeTypeDefs([userSchema]);
+const typeDefs = mergeTypeDefs([userSchema, messageSchema, chatSchema]);
 const schemaAsString = print(typeDefs);
 
 fs.writeFileSync("./schema.graphql", schemaAsString);

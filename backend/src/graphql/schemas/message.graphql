@@ -1,8 +1,29 @@
 type Message {
 	id: ID!
 	chatId: ID!
-	sender: Number!
+	sender: Sender!
 	content: String!
 	imageUrl: String
-	timestamp: String!
+}
+
+enum Sender {
+	BOT
+	USER
+}
+
+input MessageInput {
+	chatId: ID!
+	sender: Sender!
+	content: String!
+	imageUrl: String
+}
+
+type Query {
+	#search functionality should return chat name for display
+	searchMessages(phrase: String!): [ChatPreview!]!
+}
+
+type Mutation {
+	sendMessage(input: MessageInput): Message!
+	editMessage(input: MessageInput): Message!
 }

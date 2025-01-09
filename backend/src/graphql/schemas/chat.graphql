@@ -7,9 +7,26 @@ type Chat {
 
 input NewChatInput {
 	userId: ID!
+	status: ChatStatus!
+}
+
+enum ChatStatus {
+	TEMPORARY
+	ACTIVE
+}
+
+type ChatPreview {
+	id: ID!
+	name: String!
+}
+
+type Query {
+	getChat(id: String!): Chat
+	getChats(userId: String!): [Chat!]!
 }
 
 type Mutation {
 	createChat(input: NewChatInput!): Chat!
-	updateChat(id: ID!, name: String!): Chat!
+	updateChat(id: String!, name: String!): Chat!
+	deleteChat(id: String!): String!
 }

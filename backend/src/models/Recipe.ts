@@ -9,7 +9,7 @@ const RecipeSchema = new Schema(
 			default: uuidv4,
 		},
 		userId: {
-			type: Number,
+			type: String,
 			required: true,
 		},
 		name: {

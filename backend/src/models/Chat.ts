@@ -3,14 +3,18 @@ import { MessageAttributes } from "./Message";
 const { Schema, model } = mongoose;
 export interface ChatAttributes {
 	id: string;
-	userId: number;
+	userId: string;
 	name: string;
 	messages: MessageAttributes[];
+}
+export enum ChatStatus {
+	TEMPORARY = "TEMPORARY",
+	ACTIVE = "ACTIVE",
 }
 const ChatSchema = new Schema(
 	{
 		userId: {
-			type: Number,
+			type: String,
 			required: true,
 		},
 		name: {
@@ -22,6 +26,11 @@ const ChatSchema = new Schema(
 				ref: "Message",
 			},
 		],
+		status: {
+			type: String,
+			enum: ChatStatus,
+			default: ChatStatus.TEMPORARY,
+		},
 	},
 	{ timestamps: true }
 );

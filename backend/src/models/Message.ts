@@ -8,6 +8,10 @@ export interface MessageAttributes {
 	imageUrl?: string;
 	timestamp: string;
 }
+export enum Sender {
+	BOT = "BOT",
+	USER = "USER",
+}
 const MessageSchema = new Schema(
 	{
 		chatId: {
@@ -16,7 +20,8 @@ const MessageSchema = new Schema(
 			required: true,
 		},
 		sender: {
-			type: Number,
+			type: String,
+			enum: Sender,
 			required: true,
 		},
 		content: {

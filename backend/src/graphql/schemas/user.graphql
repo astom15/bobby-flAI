@@ -38,6 +38,6 @@ type Mutation {
 		countryCode: String
 		region: String
 	): User!
-	deleteUser(id: String!): String!
-	editUser(id: String!, input: EditUserInput, removalInput: ItemRemoval): User!
+	deleteUser(id: ID!): String!
+	editUser(id: ID!, input: EditUserInput, removalInput: ItemRemoval): User!
 }
