@@ -1,6 +1,6 @@
 import { prisma } from "db";
 import { Prisma } from "@prisma/client";
-import { EditUserInput, ItemRemoval, UserAttributes } from "../../models/User";
+import { EditUserInput, ItemRemoval, IUser } from "../../models/User";
 import bcrypt from "bcrypt";
 import { updateArrayItems } from "src/services/users.service";
 
@@ -9,7 +9,7 @@ export const userResolvers = {
 		getUser: async (
 			_parent: unknown,
 			{ id }: { id: string }
-		): Promise<UserAttributes | null> => {
+		): Promise<IUser | null> => {
 			try {
 				const user = await prisma.users.findUnique({
 					where: { id },
@@ -20,7 +20,7 @@ export const userResolvers = {
 				return user;
 			} catch (err) {
 				console.error("Error fetching user:", err);
-				throw new Error("Failed to fetch user. Please try again later.");
+				throw new Error("Failed to fetch user.");
 			}
 		},
 	},

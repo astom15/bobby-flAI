@@ -26,40 +26,20 @@ input ItemRemoval {
 
 type Query {
   getUser(id: String!): User
-  searchMessages(phrase: String!): [ChatPreview!]!
   getChat(id: String!): Chat
   getChats(userId: String!): [Chat!]!
+  searchMessages(phrase: String!): [ChatPreview!]!
 }
 
 type Mutation {
   createUser(name: String!, email: String!, password: String!, allergies: [String], preferences: [String], countryCode: String, region: String): User!
   deleteUser(id: ID!): String!
   editUser(id: ID!, input: EditUserInput, removalInput: ItemRemoval): User!
-  sendMessage(input: MessageInput): Message!
-  editMessage(input: MessageInput): Message!
   createChat(input: NewChatInput!): Chat!
   updateChat(id: String!, name: String!): Chat!
   deleteChat(id: String!): String!
-}
-
-type Message {
-  id: ID!
-  chatId: ID!
-  sender: Sender!
-  content: String!
-  imageUrl: String
-}
-
-enum Sender {
-  BOT
-  USER
-}
-
-input MessageInput {
-  chatId: ID!
-  sender: Sender!
-  content: String!
-  imageUrl: String
+  sendMessage(input: MessageInput): Message!
+  editMessage(input: MessageInput): Message!
 }
 
 type Chat {
@@ -67,6 +47,8 @@ type Chat {
   userId: ID!
   name: String!
   messages: [Message!]!
+  createdAt: String!
+  updatedAt: String!
 }
 
 input NewChatInput {
@@ -82,6 +64,28 @@ enum ChatStatus {
 type ChatPreview {
   id: ID!
   name: String!
+}
+
+type Message {
+  id: ID!
+  chatId: ID!
+  sender: Sender!
+  content: String!
+  imageUrl: String
+  createdAt: String
+  updatedAt: String
+}
+
+enum Sender {
+  BOT
+  USER
+}
+
+input MessageInput {
+  chatId: ID!
+  sender: Sender!
+  content: String!
+  imageUrl: String
 }
 
 schema {

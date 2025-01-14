@@ -3,6 +3,8 @@ type Chat {
 	userId: ID!
 	name: String!
 	messages: [Message!]!
+	createdAt: String!
+	updatedAt: String!
 }
 
 input NewChatInput {

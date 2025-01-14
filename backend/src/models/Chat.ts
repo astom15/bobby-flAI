@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
-import { MessageAttributes } from "./Message";
+import { IMessage } from "./Message";
+import { v4 as uuidv4 } from "uuid";
 const { Schema, model } = mongoose;
-export interface ChatAttributes {
+export interface IChat {
 	id: string;
 	userId: string;
 	name: string;
-	messages: MessageAttributes[];
+	messages: IMessage[];
+	createdAt: Date;
+	updatedAt: Date;
 }
 export enum ChatStatus {
 	TEMPORARY = "TEMPORARY",
@@ -13,6 +16,10 @@ export enum ChatStatus {
 }
 const ChatSchema = new Schema(
 	{
+		_id: {
+			type: String,
+			default: uuidv4,
+		},
 		userId: {
 			type: String,
 			required: true,
@@ -20,12 +27,6 @@ const ChatSchema = new Schema(
 		name: {
 			type: String,
 		},
-		message: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: "Message",
-			},
-		],
 		status: {
 			type: String,
 			enum: ChatStatus,
@@ -34,6 +35,33 @@ const ChatSchema = new Schema(
 	},
 	{ timestamps: true }
 );
+
+ChatSchema.virtual("id").get(function () {
+	return this._id.toString();
+});
+ChatSchema.virtual("messages", {
+	ref: "Message",
+	localField: "_id",
+	foreignField: "chatId",
+});
+ChatSchema.set("toObject", {
+	virtuals: true,
+	transform: (doc, ret) => {
+		ret.id = ret._id.toString();
+		delete ret._id;
+		delete ret.__v;
+		return ret;
+	},
+});
+ChatSchema.set("toJSON", {
+	virtuals: true,
+	transform: (doc, ret) => {
+		ret.id = ret._id.toString();
+		delete ret._id;
+		delete ret.__v;
+		return ret;
+	},
+});
 
 const Chat = model("Chat", ChatSchema);
 export default Chat;

@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import mongoose, { Connection, ConnectOptions } from "mongoose";
+import mongoose, { Connection } from "mongoose";
+import "src/models";
+
 dotenv.config();
 
 //Mongo connection

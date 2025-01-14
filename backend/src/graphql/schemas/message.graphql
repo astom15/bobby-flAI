@@ -4,6 +4,8 @@ type Message {
 	sender: Sender!
 	content: String!
 	imageUrl: String
+	createdAt: String
+	updatedAt: String
 }
 
 enum Sender {

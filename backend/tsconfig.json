@@ -18,11 +18,12 @@
 		"moduleResolution": "node"
 	},
 	"include": [
-		"*.ts",
+		"**/*.ts",
 		"src/**/*.ts",
 		"db.ts",
 		"src/graphql/**/*.ts",
-		"src/**/*.graphql"
+		"src/**/*.graphql",
+		"scripts/**/*.ts"
 	],
 	"exclude": ["node_modules", "dist"]
 }
