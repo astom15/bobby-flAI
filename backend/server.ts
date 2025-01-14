@@ -10,6 +10,7 @@ import typeDefs from "src/graphql/schemas";
 import resolvers from "src/graphql/resolvers/index.resolver";
 import chatRouter from "src/routes/chat";
 import http from "http";
+import { createDummyData } from "scripts/dummydata";
 
 const PORT = 4000;
 const httpServer = http.createServer(app);

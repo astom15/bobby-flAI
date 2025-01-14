@@ -35,8 +35,8 @@ type Mutation {
   createUser(name: String!, email: String!, password: String!, allergies: [String], preferences: [String], countryCode: String, region: String): User!
   deleteUser(id: ID!): String!
   editUser(id: ID!, input: EditUserInput, removalInput: ItemRemoval): User!
-  createChat(input: NewChatInput!): Chat!
-  updateChat(id: String!, name: String!): Chat!
+  createChat(userId: ID!): Chat!
+  renameChat(id: String!, newName: String!): String!
   deleteChat(id: String!): String!
   sendMessage(input: MessageInput): Message!
   editMessage(input: MessageInput): Message!
@@ -51,19 +51,15 @@ type Chat {
   updatedAt: String!
 }
 
-input NewChatInput {
-  userId: ID!
-  status: ChatStatus!
+type ChatPreview {
+  id: ID!
+  name: String!
+  updatedAt: String!
 }
 
 enum ChatStatus {
   TEMPORARY
   ACTIVE
-}
-
-type ChatPreview {
-  id: ID!
-  name: String!
 }
 
 type Message {

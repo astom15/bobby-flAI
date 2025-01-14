@@ -24,6 +24,7 @@ const MessageSchema = new Schema(
 			type: String,
 			ref: "Chat",
 			required: true,
+			index: true,
 		},
 		sender: {
 			type: String,

@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 
-async function createDummyData() {
+export async function createDummyData() {
 	try {
 		await mongoose.connect(process.env.MONGODB_URI || "");
 
@@ -49,4 +49,3 @@ async function createDummyData() {
 		process.exit(1);
 	}
 }
-createDummyData();

@@ -1,15 +1,21 @@
 import mongoose from "mongoose";
-import { IMessage } from "./Message";
+import Message, { IMessage } from "./Message";
 import { v4 as uuidv4 } from "uuid";
 const { Schema, model } = mongoose;
 export interface IChat {
 	id: string;
 	userId: string;
 	name: string;
-	messages: IMessage[];
+	messages?: IMessage[];
 	createdAt: Date;
 	updatedAt: Date;
 }
+export interface IChatPreview {
+	id: string;
+	name: string;
+	updatedAt: NativeDate;
+}
+
 export enum ChatStatus {
 	TEMPORARY = "TEMPORARY",
 	ACTIVE = "ACTIVE",
@@ -23,9 +29,12 @@ const ChatSchema = new Schema(
 		userId: {
 			type: String,
 			required: true,
+			index: true,
 		},
 		name: {
 			type: String,
+			required: true,
+			default: "New chat",
 		},
 		status: {
 			type: String,
@@ -43,6 +52,13 @@ ChatSchema.virtual("messages", {
 	ref: "Message",
 	localField: "_id",
 	foreignField: "chatId",
+});
+ChatSchema.pre("findOneAndDelete", async function (next) {
+	const chat = await this.model.findOne(this.getQuery());
+	if (chat) {
+		await Message.deleteMany({ chatId: chat._id });
+	}
+	next();
 });
 ChatSchema.set("toObject", {
 	virtuals: true,

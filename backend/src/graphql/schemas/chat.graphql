@@ -7,19 +7,15 @@ type Chat {
 	updatedAt: String!
 }
 
-input NewChatInput {
-	userId: ID!
-	status: ChatStatus!
+type ChatPreview {
+	id: ID!
+	name: String!
+	updatedAt: String!
 }
 
 enum ChatStatus {
 	TEMPORARY
 	ACTIVE
-}
-
-type ChatPreview {
-	id: ID!
-	name: String!
 }
 
 type Query {
@@ -28,7 +24,7 @@ type Query {
 }
 
 type Mutation {
-	createChat(input: NewChatInput!): Chat!
-	updateChat(id: String!, name: String!): Chat!
+	createChat(userId: ID!): Chat!
+	renameChat(id: String!, newName: String!): String!
 	deleteChat(id: String!): String!
 }
