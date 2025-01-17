@@ -26,6 +26,6 @@ type Query {
 }
 
 type Mutation {
-	sendMessage(input: MessageInput): Message!
+	handleMessage(input: MessageInput): Message!
 	editMessage(input: MessageInput): Message!
 }

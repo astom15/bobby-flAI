@@ -2,6 +2,15 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 import { v4 as uuidv4 } from "uuid";
 
+export interface RecipeFormat {
+	name: string;
+	prepTime: string;
+	cookTime: string;
+	totalTime: string;
+	ingredients: { name: string; quantity: string };
+	steps: string[];
+}
+
 const RecipeSchema = new Schema(
 	{
 		_id: {

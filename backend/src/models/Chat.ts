@@ -38,7 +38,7 @@ const ChatSchema = new Schema(
 		},
 		status: {
 			type: String,
-			enum: ChatStatus,
+			enum: Object.values(ChatStatus),
 			default: ChatStatus.TEMPORARY,
 		},
 	},

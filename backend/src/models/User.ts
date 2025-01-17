@@ -25,3 +25,9 @@ export interface ItemRemoval {
 	allergies?: string[];
 	preferences?: string[];
 }
+
+export interface UserSettings {
+	location: string[];
+	allergies: string[];
+	preferences: string[];
+}

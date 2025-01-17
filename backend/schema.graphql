@@ -38,7 +38,7 @@ type Mutation {
   createChat(userId: ID!): Chat!
   renameChat(id: String!, newName: String!): String!
   deleteChat(id: String!): String!
-  sendMessage(input: MessageInput): Message!
+  handleMessage(input: MessageInput): Message!
   editMessage(input: MessageInput): Message!
 }
 

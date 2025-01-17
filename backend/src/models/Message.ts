@@ -4,11 +4,17 @@ const { Schema, model } = mongoose;
 export interface IMessage {
 	id: string;
 	chatId: string;
-	sender: string;
+	sender: Sender;
 	content: string;
 	imageUrl?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+}
+export interface IMessageInput {
+	chatId: string;
+	sender: Sender;
+	content: string;
+	imageUrl?: string | null;
 }
 export enum Sender {
 	BOT = "BOT",
@@ -28,7 +34,7 @@ const MessageSchema = new Schema(
 		},
 		sender: {
 			type: String,
-			enum: Sender,
+			enum: Object.values(Sender),
 			required: true,
 		},
 		content: {

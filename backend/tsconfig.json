@@ -2,6 +2,8 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"target": "ES2022",
+		"allowJs": true,
+		"checkJs": false,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"rootDir": ".",
@@ -20,6 +22,7 @@
 	"include": [
 		"**/*.ts",
 		"src/**/*.ts",
+		"src/**/*.js",
 		"db.ts",
 		"src/graphql/**/*.ts",
 		"src/**/*.graphql",
