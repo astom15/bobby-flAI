@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import { IMessage, IMessageInput } from "src/models/Message";
+import Message, {
+	IEditMessageInput,
+	IMessage,
+	IMessageInput,
+} from "src/models/Message";
 import createError from "src/services/error.service";
 import { callGPT } from "src/services/message.service";
 
@@ -18,8 +22,44 @@ export const messageResolvers = {
 					parsedResponse[0];
 				return "";
 			} catch (err) {
-				console.log("Error generating response", err);
-				throw createError("Response generation failed - could be chatGPT.");
+				console.log("Error generating response:", err);
+				throw createError("Failed to generate recipe response");
+			}
+		},
+		editMessage: async (
+			_parent: unknown,
+			{ id, input }: { id: string; input: IEditMessageInput }
+		): Promise<IMessage> => {
+			try {
+				const message = await Message.findById(id);
+				if (!message) {
+					throw createError(`Message with id: ${id} not found`);
+				}
+
+				const updateData: { content: string; imageUrl?: string | null } = {
+					content: input.content,
+				};
+
+				if ("imageUrl" in input) {
+					updateData.imageUrl = input.imageUrl;
+				}
+
+				const updatedMessage = await Message.findByIdAndUpdate(id, updateData, {
+					new: true,
+				});
+
+				if (!updatedMessage) {
+					throw createError("Failed to update message");
+				}
+
+				const messageObj = updatedMessage.toObject();
+				return {
+					...messageObj,
+					id: messageObj._id,
+				} as IMessage;
+			} catch (err) {
+				console.log("Error editing message:", err);
+				throw createError("Failed to edit message");
 			}
 		},
 	},

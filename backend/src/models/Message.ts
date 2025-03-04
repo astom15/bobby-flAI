@@ -16,6 +16,11 @@ export interface IMessageInput {
 	content: string;
 	imageUrl?: string | null;
 }
+export interface IEditMessageInput {
+	id: string;
+	content: string;
+	imageUrl?: string | null;
+}
 export enum Sender {
 	BOT = "BOT",
 	USER = "USER",

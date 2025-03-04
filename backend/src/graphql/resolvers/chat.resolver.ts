@@ -19,7 +19,11 @@ export const chatResolvers = {
 				if (!chat) {
 					throw createError(`Chat with id: ${id} not found`);
 				}
-				return chat.toObject() as unknown as IChat;
+				const chatObj = chat.toObject();
+				return {
+					...chatObj,
+					id: chatObj._id,
+				} as IChat;
 			} catch (err) {
 				console.log("Error fetching chat", err);
 				throw createError("Failed to fetch chat.");

@@ -20,6 +20,12 @@ input MessageInput {
 	imageUrl: String
 }
 
+input EditMessageInput {
+	id: ID!
+	content: String!
+	imageUrl: String
+}
+
 type Query {
 	#search functionality should return chat name for display
 	searchMessages(phrase: String!): [ChatPreview!]!
@@ -27,5 +33,5 @@ type Query {
 
 type Mutation {
 	handleMessage(input: MessageInput): Message!
-	editMessage(input: MessageInput): Message!
+	editMessage(id: ID!, input: EditMessageInput): Message!
 }
