@@ -28,3 +28,40 @@ model Users {
 
   @@map("users") 
 }
+enum ResponseType {
+  RECIPE
+  INGREDIENT_SUBSTITUTION
+  NUTRITION_FACTS
+  EXPLANATION
+  SHOPPING_LIST
+}
+
+model RecipeTrace {
+  id Int @id @default(autoincrement())
+  traceId String @db.Char(36)@default(uuid()) @unique
+  sessionId String
+  prompt String
+  model String @db.VarChar(50)
+  response String
+  postprocessed String? //maybe not needed
+  temperature Float // closer to 0 = more deterministic, 1.0/2.0 = more creative/varied
+  topP Float? 
+  frequencyPenalty Float?
+  presencePenalty Float?
+
+  promptTokens Int?
+  completionTokens Int? //in case we log prompt + error message or just log response string
+  totalTokens Int?
+
+  responseTimeMs Int
+  retryCount Int @default(0)
+
+  rating Float?
+  responseType ResponseType?
+  userFeedback String?
+  errorTags String[]
+  autoEval Json? //grammar/hallucation scores
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("createdAt")
+}
