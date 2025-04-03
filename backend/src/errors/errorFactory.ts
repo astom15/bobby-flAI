@@ -1,31 +1,12 @@
-class CustomError extends Error {
-	statusCode: number;
-	code: string;
-	metadata?: Record<string, unknown>;
-
-	constructor({
-		message,
-		statusCode = 500,
-		code = "INTERNAL_ERROR",
-		metadata,
-	}: {
-		message: string;
-		statusCode?: number;
-		code?: string;
-		metadata?: Record<string, unknown>;
-	}) {
-		super(message);
-		this.name = this.constructor.name;
-		this.statusCode = statusCode;
-		this.code = code;
-		this.metadata = metadata;
-	}
-}
+import CustomError from "./CustomError";
 
 const createError = (message: string, options?: Partial<CustomError>) => {
 	return new CustomError({ message, ...options });
 };
 
+type S3Errors = {
+	uploadFailed: (id: string, err?: unknown) => CustomError;
+};
 type TraceErrors = {
 	invalidSessionId: (err?: unknown) => CustomError;
 	invalidPrompt: (err?: unknown) => CustomError;
@@ -39,9 +20,18 @@ type TraceLoggingErrors = {
 	insertFailed: (err?: unknown) => CustomError;
 };
 const Errors: {
+	S3: S3Errors;
 	Trace: TraceErrors;
 	TraceLogging: TraceLoggingErrors;
 } = {
+	S3: {
+		uploadFailed: (id?: string, err?: unknown) =>
+			createError("S3 Upload failed", {
+				code: "S3_UPLOAD_FAILED",
+				statusCode: 500,
+				metadata: { id, error: err },
+			}),
+	},
 	Trace: {
 		invalidSessionId: (err?: unknown) =>
 			createError("Invalid sessionId", {

@@ -41,8 +41,10 @@ model RecipeTrace {
   traceId String @db.Char(36)@default(uuid()) @unique
   sessionId String
   prompt String
+  promptUrl String?
   model String @db.VarChar(50)
   response String
+  responseUrl String?
   postprocessed String? //maybe not needed
   temperature Float // closer to 0 = more deterministic, 1.0/2.0 = more creative/varied
   topP Float? 
