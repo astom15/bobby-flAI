@@ -19,11 +19,52 @@ type TraceErrors = {
 type TraceLoggingErrors = {
 	insertFailed: (err?: unknown) => CustomError;
 };
+
+type ChatErrors = {
+	renameFailed: (err?: unknown) => CustomError;
+	createFailed: (err?: unknown) => CustomError;
+	notFound: (id: string, err?: unknown) => CustomError;
+	fetchFailed: (err?: unknown) => CustomError;
+	deleteFailed: (err?: unknown) => CustomError;
+};
 const Errors: {
+	Chat: ChatErrors;
 	S3: S3Errors;
 	Trace: TraceErrors;
 	TraceLogging: TraceLoggingErrors;
 } = {
+	Chat: {
+		createFailed: (err?: unknown) =>
+			createError("Failed to create chat", {
+				code: "CHAT_CREATE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		notFound: (id: string, err?: unknown) =>
+			createError("Chat not found", {
+				code: "CHAT_NOT_FOUND",
+				statusCode: 404,
+				metadata: { id, error: err },
+			}),
+		fetchFailed: (err?: unknown) =>
+			createError("Failed to fetch chat", {
+				code: "CHAT_FETCH_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		renameFailed: (err?: unknown) =>
+			createError("Failed to rename chat", {
+				code: "CHAT_RENAME_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		deleteFailed: (err?: unknown) =>
+			createError("Failed to delete chat", {
+				code: "CHAT_DELETE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+	},
 	S3: {
 		uploadFailed: (id?: string, err?: unknown) =>
 			createError("S3 Upload failed", {

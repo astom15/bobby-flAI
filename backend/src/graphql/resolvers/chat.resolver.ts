@@ -2,7 +2,8 @@
 import mongoose from "mongoose";
 import Chat, { IChat, IChatPreview } from "src/models/Chat";
 import Message from "src/models/Message";
-import createError from "src/services/error.service";
+import Errors from "src/errors/errorFactory";
+import { logError } from "src/services/errorLogger.service";
 
 export const chatResolvers = {
 	Query: {
@@ -17,7 +18,7 @@ export const chatResolvers = {
 				});
 
 				if (!chat) {
-					throw createError(`Chat with id: ${id} not found`);
+					throw Errors.Chat.notFound(id);
 				}
 				const chatObj = chat.toObject();
 				return {
@@ -25,8 +26,8 @@ export const chatResolvers = {
 					id: chatObj._id,
 				} as IChat;
 			} catch (err) {
-				console.log("Error fetching chat", err);
-				throw createError("Failed to fetch chat.");
+				logError(Errors.Chat.fetchFailed(err), { id });
+				throw Errors.Chat.fetchFailed(err);
 			}
 		},
 		getChats: async (
@@ -44,8 +45,8 @@ export const chatResolvers = {
 					updatedAt: chat.updatedAt,
 				}));
 			} catch (err) {
-				console.log("Error fetching chats", err);
-				throw createError("Failed to fetch chats.");
+				logError(Errors.Chat.fetchFailed(err), { userId });
+				throw Errors.Chat.fetchFailed(err);
 			}
 		},
 	},
@@ -59,8 +60,8 @@ export const chatResolvers = {
 				const { _id, name, updatedAt } = chat.toObject();
 				return { id: _id, name, updatedAt } as IChatPreview;
 			} catch (err) {
-				console.log("Error creating chat", err);
-				throw createError("Failed to create chat");
+				logError(Errors.Chat.createFailed(err), { userId });
+				throw Errors.Chat.createFailed(err);
 			}
 		},
 		renameChat: async (
@@ -75,11 +76,11 @@ export const chatResolvers = {
 				)
 					.select("name")
 					.lean();
-				if (!chat) throw createError(`Chat: ${id} not found`);
+				if (!chat) throw Errors.Chat.notFound(id);
 				return chat.name;
 			} catch (err) {
-				console.log("Error renaming chat", err);
-				throw createError("Failed to rename chat");
+				logError(Errors.Chat.renameFailed(err), { id });
+				throw Errors.Chat.renameFailed(err);
 			}
 		},
 		deleteChat: async (
@@ -90,12 +91,12 @@ export const chatResolvers = {
 			session.startTransaction();
 			try {
 				const chat = await Chat.findByIdAndDelete({ _id: id }).session(session);
-				if (!chat) throw createError(`Chat: ${id} not found`);
+				if (!chat) throw Errors.Chat.notFound(id);
 				const messagesCount = await Message.countDocuments({
 					chatId: id,
 				}).session(session);
 				if (messagesCount > 0) {
-					throw createError("Failed to delete all messages");
+					throw Errors.Chat.deleteFailed("Failed to delete all messages");
 				}
 				await session.commitTransaction();
 				session.endSession();
@@ -103,8 +104,8 @@ export const chatResolvers = {
 			} catch (err) {
 				await session.abortTransaction();
 				session.endSession();
-				console.log("Error deleting chat", err);
-				throw createError("Failed to delete chat");
+				logError(Errors.Chat.deleteFailed(err), { id });
+				throw Errors.Chat.deleteFailed(err);
 			}
 		},
 	},
