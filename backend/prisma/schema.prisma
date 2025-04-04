@@ -66,4 +66,5 @@ model RecipeTrace {
   metadata Json?
 
   createdAt DateTime @default(now()) @map("createdAt")
+  @@map("recipe_traces")
 }
