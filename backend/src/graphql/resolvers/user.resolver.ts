@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 import { EditUserInput, ItemRemoval, IUser } from "../../models/User";
 import bcrypt from "bcrypt";
 import { updateArrayItems } from "src/services/users.service";
+import Errors from "src/errors/errorFactory";
+import { logError } from "src/services/errorLogger.service";
 
 export const userResolvers = {
 	Query: {
@@ -15,12 +17,12 @@ export const userResolvers = {
 					where: { id },
 				});
 				if (!user) {
-					throw new Error(`User with id ${id} not found.`);
+					throw Errors.User.notFound(id);
 				}
 				return user;
 			} catch (err) {
-				console.error("Error fetching user:", err);
-				throw new Error("Failed to fetch user.");
+				logError(Errors.User.fetchFailed(err), { id });
+				throw Errors.User.fetchFailed(err);
 			}
 		},
 	},
@@ -43,7 +45,7 @@ export const userResolvers = {
 				const userExists = await prisma.users.findUnique({
 					where: { email: normalizedEmail },
 				});
-				if (userExists) throw new Error("That email is already in use!");
+				if (userExists) throw Errors.User.emailInUse(normalizedEmail);
 
 				const hashedPassword = await bcrypt.hash(password, 10);
 				return prisma.users.create({
@@ -59,8 +61,13 @@ export const userResolvers = {
 					},
 				});
 			} catch (err) {
-				console.error("Error creating user:", err);
-				throw new Error("Failed to create user.");
+				logError(Errors.User.createFailed(err), {
+					name,
+					email,
+					allergies,
+					preferences,
+				});
+				throw Errors.User.createFailed(err);
 			}
 		},
 		// this causes an issue later because recipes, chats, and others will have a user id.
@@ -73,8 +80,8 @@ export const userResolvers = {
 				const deletedUser = await prisma.users.delete({ where: { id } });
 				return deletedUser.id;
 			} catch (err) {
-				console.log("Error deleting user:", err);
-				throw new Error("Failed to delete user.");
+				logError(Errors.User.deleteFailed(err), { id });
+				throw Errors.User.deleteFailed(err);
 			}
 		},
 		editUser: async (
@@ -88,7 +95,7 @@ export const userResolvers = {
 			try {
 				const user = await prisma.users.findUnique({ where: { id } });
 				if (!user) {
-					throw new Error(`User ${id} not found.`);
+					throw Errors.User.notFound(id);
 				}
 				const updatedData = { ...input };
 				updatedData.allergies = updateArrayItems(
@@ -107,11 +114,9 @@ export const userResolvers = {
 				});
 				return updatedUser;
 			} catch (err) {
-				console.log("Error deleting user:", err);
-				throw new Error("Failed to update user.");
+				logError(Errors.User.updateFailed(err), { id });
+				throw Errors.User.updateFailed(err);
 			}
 		},
 	},
 };
-
-// need to test this shit and also figure out how apollo server works with prisma servers

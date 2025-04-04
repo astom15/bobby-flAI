@@ -27,7 +27,17 @@ type ChatErrors = {
 	fetchFailed: (err?: unknown) => CustomError;
 	deleteFailed: (err?: unknown) => CustomError;
 };
+type UserErrors = {
+	createFailed: (err?: unknown) => CustomError;
+	notFound: (id: string, err?: unknown) => CustomError;
+	fetchFailed: (err?: unknown) => CustomError;
+	deleteFailed: (err?: unknown) => CustomError;
+	updateFailed: (err?: unknown) => CustomError;
+	emailInUse: (email: string, err?: unknown) => CustomError;
+};
+
 const Errors: {
+	User: UserErrors;
 	Chat: ChatErrors;
 	S3: S3Errors;
 	Trace: TraceErrors;
@@ -117,6 +127,44 @@ const Errors: {
 				code: "TRACE_LOGGING_FAILED",
 				statusCode: 500,
 				metadata: { error: err },
+			}),
+	},
+	User: {
+		createFailed: (err?: unknown) =>
+			createError("Failed to create user", {
+				code: "USER_CREATE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		notFound: (id: string, err?: unknown) =>
+			createError("User not found", {
+				code: "USER_NOT_FOUND",
+				statusCode: 404,
+				metadata: { id, error: err },
+			}),
+		fetchFailed: (err?: unknown) =>
+			createError("Failed to fetch user", {
+				code: "USER_FETCH_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		deleteFailed: (err?: unknown) =>
+			createError("Failed to delete user", {
+				code: "USER_DELETE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		updateFailed: (err?: unknown) =>
+			createError("Failed to update user", {
+				code: "USER_UPDATE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		emailInUse: (email: string, err?: unknown) =>
+			createError("Email already in use", {
+				code: "USER_EMAIL_IN_USE",
+				statusCode: 400,
+				metadata: { email, error: err },
 			}),
 	},
 };

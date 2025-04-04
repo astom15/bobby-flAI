@@ -2,7 +2,7 @@ import natural from "natural";
 import { possibleRecipeIntent, systemPrompts } from "src/config";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import createError from "./error.service";
+import createError from "../errors/errorFactory";
 import moment from "moment";
 import { UserSettings } from "src/models/User";
 dotenv.config();
