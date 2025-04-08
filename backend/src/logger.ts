@@ -28,7 +28,9 @@ if (!isProduction) {
 			ignore: "pid,hostname,service,environment", // Avoid redundant fields in pretty print
 			// Show custom error properties nicely in development
 			errorProps: "code,statusCode,metadata,originalStack",
-			messageFormat: "{levelLabel} - {pid} - {msg}", // Customize message format if desired
+			messageFormat: "{msg}", // Just show the message, level and pid are handled by pino-pretty
+			levelFirst: true, // Show level first
+			levelLabel: "level", // Use the level property for the label
 		},
 	};
 } else {

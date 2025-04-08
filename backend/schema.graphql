@@ -39,7 +39,7 @@ type Mutation {
   renameChat(id: String!, newName: String!): String!
   deleteChat(id: String!): String!
   handleMessage(input: MessageInput): Message!
-  editMessage(input: MessageInput): Message!
+  editMessage(id: ID!, input: EditMessageInput): Message!
 }
 
 type Chat {
@@ -80,6 +80,12 @@ enum Sender {
 input MessageInput {
   chatId: ID!
   sender: Sender!
+  content: String!
+  imageUrl: String
+}
+
+input EditMessageInput {
+  id: ID!
   content: String!
   imageUrl: String
 }

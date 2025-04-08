@@ -2,9 +2,13 @@ import natural from "natural";
 import { possibleRecipeIntent, systemPrompts } from "src/config";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import createError from "../errors/errorFactory";
 import moment from "moment";
 import { UserSettings } from "src/models/User";
+import Errors from "../errors/errorFactory";
+import { v4 as uuidv4 } from "uuid";
+import { logError } from "./errorLogger.service";
+import { logRecipeTrace } from "./recipeTrace.service";
+import { IRecipeTrace } from "src/models/RecipeTrace";
 dotenv.config();
 
 export enum EIntent {
@@ -31,7 +35,34 @@ const detectIntent = (input: string): string => {
 };
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+function parseGPTResponse(content: string): {
+	parsedResponse: string | null;
+	postprocessed: string | null;
+} {
+	try {
+		const parsedResponse = JSON.parse(content);
+		if (!Array.isArray(parsedResponse) || parsedResponse.length === 0) {
+			throw Errors.Message.noResponseGenerated(content);
+		}
+		const postprocessed = JSON.stringify({
+			name: parsedResponse[0].name,
+			prepTime: parsedResponse[0].prepTime,
+			cookTime: parsedResponse[0].cookTime,
+			totalTime: parsedResponse[0].totalTime,
+			ingredients: parsedResponse[0].ingredients,
+			steps: parsedResponse[0].steps,
+		});
+		return { parsedResponse, postprocessed };
+	} catch (err) {
+		logError(Errors.Message.parseFailed(err));
+		return { parsedResponse: null, postprocessed: null };
+	}
+}
+
 const callGPT = async (input: string) => {
+	const startTime = Date.now();
+	const sessionId = uuidv4();
 	// THIS IS TEMPORARY
 	const TEMPORARY_SETTINGS = { location: [], allergies: [], preferences: [] };
 	const isRecipeRelated = detectIntent(input);
@@ -47,11 +78,53 @@ const callGPT = async (input: string) => {
 				{ role: "developer", content: prompt },
 				{ role: "user", content: input },
 			],
+			temperature: 0.7, // Some creativity but still focused
+			top_p: 0.9, // Allow some diversity in word choice
+			frequency_penalty: 0.3, // Mild penalty for repeating terms
+			presence_penalty: 0.1, // Slight encouragement for new concepts
 		});
-		return response.choices[0]?.message?.content || "No response generated";
+		const content = response.choices[0]?.message?.content;
+		if (!content) {
+			throw Errors.Message.noResponseGenerated(input);
+		}
+		console.log(content);
+		console.log("-0-----------------------------");
+		const { parsedResponse, postprocessed } = parseGPTResponse(content);
+		const traceData: IRecipeTrace = {
+			sessionId,
+			prompt,
+			model: "gpt-4o-mini",
+			response: content,
+			temperature: 0.7,
+			promptTokens: response.usage?.prompt_tokens,
+			completionTokens: response.usage?.completion_tokens,
+			totalTokens: response.usage?.total_tokens,
+			responseTimeMs: Date.now() - startTime,
+			postprocessed,
+			retryCount: 0,
+			errorTags: [],
+			responseType: ["recipe"],
+			metadata: {
+				intent: isRecipeRelated,
+				userSettings: TEMPORARY_SETTINGS,
+				parseSuccess: !!parsedResponse,
+			},
+			top_p: 0.9,
+			frequency_penalty: 0.3,
+			presence_penalty: 0.1,
+			autoEval: {
+				grammar: undefined,
+				hallucination: undefined,
+				coherence: undefined,
+			},
+			rating: null,
+			userFeedback: null,
+		};
+		await logRecipeTrace(traceData);
+		return content;
 	} catch (err) {
-		console.log("Error with GPT response", err);
-		throw createError("GPT Response failed");
+		logError(Errors.Message.noResponseGenerated(input, err));
+		throw Errors.Message.noResponseGenerated(input, err);
 	}
 };
 

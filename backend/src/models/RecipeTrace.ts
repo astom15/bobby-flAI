@@ -19,23 +19,27 @@ interface AutoEvaluation {
 		| undefined;
 }
 export interface IRecipeTrace {
+	traceId?: string;
 	sessionId: string;
 	prompt: string;
-	promptUrl?: string;
+	promptUrl?: string | null;
 	model: string;
 	response: string;
-	responseUrl: string;
+	responseUrl?: string | null;
 	temperature: number;
-	postprocessed?: string;
-	promptTokens?: number;
-	completionTokens?: number;
-	totalTokens?: number;
+	postprocessed?: string | null;
+	promptTokens?: number | null;
+	completionTokens?: number | null;
+	totalTokens?: number | null;
 	responseTimeMs: number;
-	retryCount?: number;
+	retryCount?: number | null;
 	autoEval?: AutoEvaluation;
 	metadata?: Record<string, unknown>; //probably revisit this later and make an actual interface
-	rating?: number;
-	userFeedback?: string;
+	rating?: number | null;
+	userFeedback?: string | null;
 	errorTags?: string[];
 	responseType?: string[];
+	top_p?: number | null;
+	frequency_penalty?: number | null;
+	presence_penalty?: number | null;
 }

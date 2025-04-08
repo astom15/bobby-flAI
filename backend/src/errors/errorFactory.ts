@@ -36,12 +36,21 @@ type UserErrors = {
 	emailInUse: (email: string, err?: unknown) => CustomError;
 };
 
+type MessageErrors = {
+	noResponseGenerated: (input: string, err?: unknown) => CustomError;
+	updatedFailed: (err?: unknown) => CustomError;
+	editFailed: (err?: unknown) => CustomError;
+	notFound: (id: string, err?: unknown) => CustomError;
+	parseFailed: (err?: unknown) => CustomError;
+};
+
 const Errors: {
-	User: UserErrors;
 	Chat: ChatErrors;
+	Message: MessageErrors;
 	S3: S3Errors;
 	Trace: TraceErrors;
 	TraceLogging: TraceLoggingErrors;
+	User: UserErrors;
 } = {
 	Chat: {
 		createFailed: (err?: unknown) =>
@@ -71,6 +80,38 @@ const Errors: {
 		deleteFailed: (err?: unknown) =>
 			createError("Failed to delete chat", {
 				code: "CHAT_DELETE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+	},
+	Message: {
+		noResponseGenerated: (input: string, err?: unknown) =>
+			createError("No response generated from GPT", {
+				code: "MESSAGE_NO_RESPONSE_GENERATED",
+				statusCode: 500,
+				metadata: { input, error: err },
+			}),
+		updatedFailed: (err?: unknown) =>
+			createError("Failed to update message", {
+				code: "MESSAGE_UPDATE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		editFailed: (err?: unknown) =>
+			createError("Failed to edit message", {
+				code: "MESSAGE_EDIT_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		notFound: (id: string, err?: unknown) =>
+			createError("Message not found", {
+				code: "MESSAGE_NOT_FOUND",
+				statusCode: 404,
+				metadata: { id, error: err },
+			}),
+		parseFailed: (err?: unknown) =>
+			createError("Failed to parse GPT response", {
+				code: "MESSAGE_PARSE_FAILED",
 				statusCode: 500,
 				metadata: { error: err },
 			}),
@@ -123,7 +164,7 @@ const Errors: {
 	},
 	TraceLogging: {
 		insertFailed: (err?: unknown) =>
-			createError("Failed to insert trace into DB", {
+			createError("Failed to insert trace into W&B", {
 				code: "TRACE_LOGGING_FAILED",
 				statusCode: 500,
 				metadata: { error: err },
