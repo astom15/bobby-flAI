@@ -4,7 +4,12 @@ export const systemPrompts = {
 		- Time of day (e.g., breakfast, lunch, dinner, or late-night snacks).
 		- Cultural or regional dishes that might be popular during this time of year.
 		- Simpler recipes for weekdays, more elaborate ones for weekends.
-	Your output is going to consist of an array of JSON objects and you will NOT wrap it within JSON md markers:
+	Your output is going to consist of an array of JSON objects with: 
+	1. All strings in double quotes (not single quotes).
+    2. All property names in double quotes.
+    3. All numeric values as strings.
+	4. will NOT wrap it within JSON md markers.
+	Example format:
 	[
 		{
 			"name": "A descriptive name for this recipe",

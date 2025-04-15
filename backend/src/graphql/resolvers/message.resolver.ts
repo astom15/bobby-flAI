@@ -17,14 +17,13 @@ export const messageResolvers = {
 		): Promise<string> => {
 			try {
 				const gptResponse = await callGPT(input.content);
-				const parsedResponse = JSON.parse(gptResponse);
-				const { name, prepTime, cookTime, totalTime, ingredients, steps } =
-					parsedResponse[0];
-				console.log(parsedResponse);
-				return "";
+				// const { name, prepTime, cookTime, totalTime, ingredients, steps } =
+				// 	gptResponse[0];
+				// console.log(gptResponse);
+				return JSON.stringify(gptResponse);
 			} catch (err) {
-				logError(Errors.Message.noResponseGenerated(input.content, err));
-				throw Errors.Message.noResponseGenerated(input.content, err);
+				logError(Errors.Message.noResponseGenerated(err));
+				throw Errors.Message.noResponseGenerated(err);
 			}
 		},
 		editMessage: async (

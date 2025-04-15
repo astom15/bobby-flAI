@@ -96,30 +96,35 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 	if (typeof trace.responseTimeMs !== "number" || trace.responseTimeMs < 0) {
 		throw new Error("Invalid responseTimeMs");
 	}
-	await prisma.recipeTrace.create({
-		data: {
-			sessionId: trace.sessionId,
-			traceId,
-			prompt: trace.prompt,
-			promptUrl: trace.promptUrl ?? null,
-			model: trace.model,
-			response: trace.response,
-			responseUrl: trace.responseUrl,
-			postprocessed: postprocessed ?? null,
-			temperature: trace.temperature,
-			promptTokens,
-			completionTokens,
-			totalTokens,
-			responseTimeMs: trace.responseTimeMs,
-			retryCount: retryCount,
-			autoEval,
-			metadata,
-			rating,
-			userFeedback: trace.userFeedback ?? null,
-			errorTags,
-		},
-	});
+	try {
+		await prisma.recipeTrace.create({
+			data: {
+				sessionId: trace.sessionId,
+				traceId,
+				prompt: trace.prompt,
+				promptUrl: trace.promptUrl ?? null,
+				model: trace.model,
+				response: trace.response,
+				responseUrl: trace.responseUrl,
+				postprocessed: postprocessed ?? null,
+				temperature: trace.temperature,
+				promptTokens,
+				completionTokens,
+				totalTokens,
+				responseTimeMs: trace.responseTimeMs,
+				retryCount: retryCount,
+				autoEval,
+				metadata,
+				rating,
+				userFeedback: trace.userFeedback ?? null,
+				errorTags,
+			},
+		});
+	} catch (err) {
+		logError(Errors.TraceLogging.insertFailed(err));
+	}
 
+	console.log(trace, fullPrompt, fullResponse);
 	const wandbTrace = {
 		...trace,
 		prompt: fullPrompt,

@@ -37,11 +37,12 @@ type UserErrors = {
 };
 
 type MessageErrors = {
-	noResponseGenerated: (input: string, err?: unknown) => CustomError;
+	noResponseGenerated: (err?: unknown) => CustomError;
 	updatedFailed: (err?: unknown) => CustomError;
 	editFailed: (err?: unknown) => CustomError;
 	notFound: (id: string, err?: unknown) => CustomError;
 	parseFailed: (err?: unknown) => CustomError;
+	illFormedResponse: (err?: unknown) => CustomError;
 };
 
 const Errors: {
@@ -85,11 +86,11 @@ const Errors: {
 			}),
 	},
 	Message: {
-		noResponseGenerated: (input: string, err?: unknown) =>
+		noResponseGenerated: (err?: unknown) =>
 			createError("No response generated from GPT", {
 				code: "MESSAGE_NO_RESPONSE_GENERATED",
 				statusCode: 500,
-				metadata: { input, error: err },
+				metadata: { error: err },
 			}),
 		updatedFailed: (err?: unknown) =>
 			createError("Failed to update message", {
@@ -112,6 +113,12 @@ const Errors: {
 		parseFailed: (err?: unknown) =>
 			createError("Failed to parse GPT response", {
 				code: "MESSAGE_PARSE_FAILED",
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+		illFormedResponse: (err?: unknown) =>
+			createError("Ill-formed GPT response", {
+				code: "MESSAGE_ILL_FORMED_RESPONSE",
 				statusCode: 500,
 				metadata: { error: err },
 			}),

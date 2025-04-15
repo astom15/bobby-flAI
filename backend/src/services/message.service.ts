@@ -36,30 +36,6 @@ const detectIntent = (input: string): string => {
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-function parseGPTResponse(content: string): {
-	parsedResponse: string | null;
-	postprocessed: string | null;
-} {
-	try {
-		const parsedResponse = JSON.parse(content);
-		if (!Array.isArray(parsedResponse) || parsedResponse.length === 0) {
-			throw Errors.Message.noResponseGenerated(content);
-		}
-		const postprocessed = JSON.stringify({
-			name: parsedResponse[0].name,
-			prepTime: parsedResponse[0].prepTime,
-			cookTime: parsedResponse[0].cookTime,
-			totalTime: parsedResponse[0].totalTime,
-			ingredients: parsedResponse[0].ingredients,
-			steps: parsedResponse[0].steps,
-		});
-		return { parsedResponse, postprocessed };
-	} catch (err) {
-		logError(Errors.Message.parseFailed(err));
-		return { parsedResponse: null, postprocessed: null };
-	}
-}
-
 const callGPT = async (input: string) => {
 	const startTime = Date.now();
 	const sessionId = uuidv4();
@@ -85,46 +61,111 @@ const callGPT = async (input: string) => {
 		});
 		const content = response.choices[0]?.message?.content;
 		if (!content) {
-			throw Errors.Message.noResponseGenerated(input);
+			throw Errors.Message.noResponseGenerated();
 		}
-		console.log(content);
-		console.log("-0-----------------------------");
-		const { parsedResponse, postprocessed } = parseGPTResponse(content);
-		const traceData: IRecipeTrace = {
-			sessionId,
-			prompt,
-			model: "gpt-4o-mini",
-			response: content,
-			temperature: 0.7,
-			promptTokens: response.usage?.prompt_tokens,
-			completionTokens: response.usage?.completion_tokens,
-			totalTokens: response.usage?.total_tokens,
-			responseTimeMs: Date.now() - startTime,
-			postprocessed,
-			retryCount: 0,
-			errorTags: [],
-			responseType: ["recipe"],
-			metadata: {
-				intent: isRecipeRelated,
-				userSettings: TEMPORARY_SETTINGS,
-				parseSuccess: !!parsedResponse,
-			},
-			top_p: 0.9,
-			frequency_penalty: 0.3,
-			presence_penalty: 0.1,
-			autoEval: {
-				grammar: undefined,
-				hallucination: undefined,
-				coherence: undefined,
-			},
-			rating: null,
-			userFeedback: null,
-		};
-		await logRecipeTrace(traceData);
-		return content;
+		const sanitizedContent = content
+			.replace(/'/g, '"') // Replace all single quotes with double quotes
+			.replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Ensure property names are quoted
+			.replace(/:\s*(\d+)([,}])/g, ':"$1"$2'); // Quote numeric values
+
+		try {
+			const parsedContent = JSON.parse(sanitizedContent);
+			if (!Array.isArray(parsedContent)) {
+				logError(Errors.Message.illFormedResponse("Response is not an array"));
+				throw Errors.Message.illFormedResponse();
+			}
+			for (const recipe of parsedContent) {
+				if (
+					!recipe.name ||
+					!recipe.prepTime ||
+					!recipe.cookTime ||
+					!recipe.totalTime ||
+					!recipe.ingredients ||
+					!recipe.steps
+				) {
+					logError(Errors.Message.illFormedResponse("Recipe is ill-formed"));
+					throw Errors.Message.illFormedResponse();
+				}
+				const postprocessed = JSON.stringify({
+					name: recipe.name,
+					prepTime: recipe.prepTime,
+					cookTime: recipe.cookTime,
+					totalTime: recipe.totalTime,
+					ingredients: recipe.ingredients,
+					steps: recipe.steps,
+				});
+				const traceData: IRecipeTrace = {
+					sessionId,
+					prompt,
+					model: "gpt-4o-mini",
+					response: content,
+					temperature: 0.7,
+					promptTokens: response.usage?.prompt_tokens,
+					completionTokens: response.usage?.completion_tokens,
+					totalTokens: response.usage?.total_tokens,
+					responseTimeMs: Date.now() - startTime,
+					postprocessed,
+					retryCount: 0,
+					errorTags: [],
+					responseType: ["recipe"],
+					metadata: {
+						intent: isRecipeRelated,
+						userSettings: TEMPORARY_SETTINGS,
+						parseSuccess: !!content,
+					},
+					top_p: 0.9,
+					frequency_penalty: 0.3,
+					presence_penalty: 0.1,
+					autoEval: {
+						grammar: undefined,
+						hallucination: undefined,
+						coherence: undefined,
+					},
+					rating: null,
+					userFeedback: null,
+				};
+				await logRecipeTrace(traceData);
+			}
+			return parsedContent;
+		} catch (parseErr) {
+			const traceData: IRecipeTrace = {
+				sessionId,
+				prompt,
+				model: "gpt-4o-mini",
+				response: content, // Original response
+				temperature: 0.7,
+				promptTokens: response.usage?.prompt_tokens,
+				completionTokens: response.usage?.completion_tokens,
+				totalTokens: response.usage?.total_tokens,
+				responseTimeMs: Date.now() - startTime,
+				postprocessed: null,
+				retryCount: 0,
+				errorTags: ["parse_failed"],
+				responseType: ["error"],
+				metadata: {
+					intent: isRecipeRelated,
+					userSettings: TEMPORARY_SETTINGS,
+					parseSuccess: false,
+					error: parseErr instanceof Error ? parseErr.message : "Parse failed",
+				},
+				top_p: 0.9,
+				frequency_penalty: 0.3,
+				presence_penalty: 0.1,
+				autoEval: {
+					grammar: undefined,
+					hallucination: undefined,
+					coherence: undefined,
+				},
+				rating: null,
+				userFeedback: null,
+			};
+			await logRecipeTrace(traceData);
+			logError(Errors.Message.parseFailed(parseErr));
+			throw Errors.Message.parseFailed(parseErr);
+		}
 	} catch (err) {
-		logError(Errors.Message.noResponseGenerated(input, err));
-		throw Errors.Message.noResponseGenerated(input, err);
+		logError(Errors.Message.noResponseGenerated(err));
+		throw Errors.Message.noResponseGenerated(err);
 	}
 };
 
