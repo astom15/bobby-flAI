@@ -3,12 +3,20 @@ import { possibleRecipeIntent, systemPrompts } from "src/config";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import moment from "moment";
-import { UserSettings } from "src/models/User";
+import { UserSettings } from "src/interfaces/IUser";
 import Errors from "../errors/errorFactory";
 import { v4 as uuidv4 } from "uuid";
 import { logError } from "./errorLogger.service";
-import { logRecipeTrace } from "./recipeTrace.service";
-import { IRecipeTrace } from "src/models/RecipeTrace";
+import {
+	createBaseTraceData,
+	createErrorTrace,
+	logRecipeTrace,
+} from "./recipeTrace.service";
+import {
+	processRecipe,
+	sanitizeGPTResponse,
+	validateRecipe,
+} from "./recipe.service";
 dotenv.config();
 
 export enum EIntent {
@@ -39,8 +47,11 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const callGPT = async (input: string) => {
 	const startTime = Date.now();
 	const sessionId = uuidv4();
-	// THIS IS TEMPORARY
-	const TEMPORARY_SETTINGS = { location: [], allergies: [], preferences: [] };
+	const TEMPORARY_SETTINGS: UserSettings = {
+		location: [],
+		allergies: [],
+		preferences: [],
+	};
 	const isRecipeRelated = detectIntent(input);
 	const prompt =
 		isRecipeRelated == EIntent.RECIPE_REQUEST
@@ -54,118 +65,68 @@ const callGPT = async (input: string) => {
 				{ role: "developer", content: prompt },
 				{ role: "user", content: input },
 			],
-			temperature: 0.7, // Some creativity but still focused
-			top_p: 0.9, // Allow some diversity in word choice
-			frequency_penalty: 0.3, // Mild penalty for repeating terms
-			presence_penalty: 0.1, // Slight encouragement for new concepts
+			temperature: 0.7,
+			top_p: 0.9,
+			frequency_penalty: 0.3,
+			presence_penalty: 0.1,
 		});
+
 		const content = response.choices[0]?.message?.content;
 		if (!content) {
 			throw Errors.Message.noResponseGenerated();
 		}
-		const sanitizedContent = content
-			.replace(/'/g, '"') // Replace all single quotes with double quotes
-			.replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Ensure property names are quoted
-			.replace(/:\s*(\d+)([,}])/g, ':"$1"$2'); // Quote numeric values
 
+		let parsedContent;
 		try {
-			const parsedContent = JSON.parse(sanitizedContent);
-			if (!Array.isArray(parsedContent)) {
-				logError(Errors.Message.illFormedResponse("Response is not an array"));
-				throw Errors.Message.illFormedResponse();
-			}
-			for (const recipe of parsedContent) {
-				if (
-					!recipe.name ||
-					!recipe.prepTime ||
-					!recipe.cookTime ||
-					!recipe.totalTime ||
-					!recipe.ingredients ||
-					!recipe.steps
-				) {
-					logError(Errors.Message.illFormedResponse("Recipe is ill-formed"));
-					throw Errors.Message.illFormedResponse();
-				}
-				const postprocessed = JSON.stringify({
-					name: recipe.name,
-					prepTime: recipe.prepTime,
-					cookTime: recipe.cookTime,
-					totalTime: recipe.totalTime,
-					ingredients: recipe.ingredients,
-					steps: recipe.steps,
-				});
-				const traceData: IRecipeTrace = {
-					sessionId,
-					prompt,
-					model: "gpt-4o-mini",
-					response: content,
-					temperature: 0.7,
-					promptTokens: response.usage?.prompt_tokens,
-					completionTokens: response.usage?.completion_tokens,
-					totalTokens: response.usage?.total_tokens,
-					responseTimeMs: Date.now() - startTime,
-					postprocessed,
-					retryCount: 0,
-					errorTags: [],
-					responseType: ["recipe"],
-					metadata: {
-						intent: isRecipeRelated,
-						userSettings: TEMPORARY_SETTINGS,
-						parseSuccess: !!content,
-					},
-					top_p: 0.9,
-					frequency_penalty: 0.3,
-					presence_penalty: 0.1,
-					autoEval: {
-						grammar: undefined,
-						hallucination: undefined,
-						coherence: undefined,
-					},
-					rating: null,
-					userFeedback: null,
-				};
-				await logRecipeTrace(traceData);
-			}
-			return parsedContent;
+			const sanitizedContent = sanitizeGPTResponse(content);
+			parsedContent = JSON.parse(sanitizedContent);
 		} catch (parseErr) {
-			const traceData: IRecipeTrace = {
+			const baseTrace = createBaseTraceData(
 				sessionId,
 				prompt,
-				model: "gpt-4o-mini",
-				response: content, // Original response
-				temperature: 0.7,
-				promptTokens: response.usage?.prompt_tokens,
-				completionTokens: response.usage?.completion_tokens,
-				totalTokens: response.usage?.total_tokens,
-				responseTimeMs: Date.now() - startTime,
-				postprocessed: null,
-				retryCount: 0,
-				errorTags: ["parse_failed"],
-				responseType: ["error"],
-				metadata: {
-					intent: isRecipeRelated,
-					userSettings: TEMPORARY_SETTINGS,
-					parseSuccess: false,
-					error: parseErr instanceof Error ? parseErr.message : "Parse failed",
-				},
-				top_p: 0.9,
-				frequency_penalty: 0.3,
-				presence_penalty: 0.1,
-				autoEval: {
-					grammar: undefined,
-					hallucination: undefined,
-					coherence: undefined,
-				},
-				rating: null,
-				userFeedback: null,
-			};
-			await logRecipeTrace(traceData);
-			logError(Errors.Message.parseFailed(parseErr));
+				response,
+				startTime,
+				TEMPORARY_SETTINGS,
+				isRecipeRelated
+			);
+			const errorTrace = createErrorTrace(baseTrace, parseErr);
+			await logRecipeTrace(errorTrace);
 			throw Errors.Message.parseFailed(parseErr);
 		}
+
+		try {
+			const baseTrace = createBaseTraceData(
+				sessionId,
+				prompt,
+				response,
+				startTime,
+				TEMPORARY_SETTINGS,
+				isRecipeRelated
+			);
+
+			if (!Array.isArray(parsedContent)) {
+				throw Errors.Message.illFormedResponse("Response is not an array");
+			}
+
+			for (const recipe of parsedContent) {
+				if (!validateRecipe(recipe)) {
+					throw Errors.Message.illFormedResponse();
+				}
+				await processRecipe(recipe, baseTrace);
+			}
+
+			return parsedContent;
+		} catch (traceErr) {
+			throw Object.assign(Errors.TraceLogging.insertFailed(traceErr), {
+				gptResponse: parsedContent,
+			});
+		}
 	} catch (err) {
-		logError(Errors.Message.noResponseGenerated(err));
-		throw Errors.Message.noResponseGenerated(err);
+		if (err instanceof Errors.TraceLogging.insertFailed) {
+			throw err;
+		}
+		logError(err);
+		throw err;
 	}
 };
 

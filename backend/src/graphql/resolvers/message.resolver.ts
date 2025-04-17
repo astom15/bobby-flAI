@@ -22,8 +22,18 @@ export const messageResolvers = {
 				// console.log(gptResponse);
 				return JSON.stringify(gptResponse);
 			} catch (err) {
-				logError(Errors.Message.noResponseGenerated(err));
-				throw Errors.Message.noResponseGenerated(err);
+				if (err instanceof Errors.Message.noResponseGenerated) {
+					logError(err);
+					throw err;
+				} else if (err instanceof Errors.TraceLogging.insertFailed) {
+					logError(err);
+					return JSON.stringify(
+						(err as unknown as { gptResponse: string }).gptResponse
+					);
+				} else {
+					logError(Errors.Message.illFormedResponse(err));
+					throw Errors.Message.illFormedResponse(err);
+				}
 			}
 		},
 		editMessage: async (

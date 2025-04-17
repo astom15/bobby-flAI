@@ -1,6 +1,6 @@
 import { prisma } from "db";
 import { Prisma } from "@prisma/client";
-import { EditUserInput, ItemRemoval, IUser } from "../../models/User";
+import { EditUserInput, ItemRemoval, IUser } from "../../interfaces/IUser";
 import bcrypt from "bcrypt";
 import { updateArrayItems } from "src/services/users.service";
 import Errors from "src/errors/errorFactory";

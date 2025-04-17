@@ -1,4 +1,4 @@
-import { IRecipeTrace } from "src/models/RecipeTrace";
+import { IRecipeTrace } from "src/interfaces/IRecipeTrace";
 import Errors from "../errors/errorFactory";
 import { v4 as uuidv4 } from "uuid";
 import dotenv from "dotenv";
@@ -7,6 +7,8 @@ import { s3Upload } from "./s3.service";
 import { Prisma } from "@prisma/client/default";
 import axios from "axios";
 import { logError } from "./errorLogger.service";
+import OpenAI from "openai";
+import { UserSettings } from "src/interfaces/IUser";
 dotenv.config();
 
 const WANDB_SERVICE_URL =
@@ -123,8 +125,6 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 	} catch (err) {
 		logError(Errors.TraceLogging.insertFailed(err));
 	}
-
-	console.log(trace, fullPrompt, fullResponse);
 	const wandbTrace = {
 		...trace,
 		prompt: fullPrompt,
@@ -148,3 +148,54 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 		logError(Errors.TraceLogging.insertFailed(errorMessage));
 	}
 }
+export const createBaseTraceData = (
+	sessionId: string,
+	prompt: string,
+	response: OpenAI.Chat.Completions.ChatCompletion & {
+		_request_id?: string | null;
+	},
+	startTime: number,
+	settings: UserSettings,
+	isRecipeRelated: string
+): Partial<IRecipeTrace> => ({
+	sessionId,
+	prompt,
+	model: "gpt-4o-mini",
+	response: JSON.stringify(response),
+	temperature: 0.7,
+	promptTokens: response.usage?.prompt_tokens,
+	completionTokens: response.usage?.completion_tokens,
+	totalTokens: response.usage?.total_tokens,
+	responseTimeMs: Date.now() - startTime,
+	retryCount: 0,
+	metadata: {
+		intent: isRecipeRelated,
+		userSettings: settings,
+	},
+	top_p: 0.9,
+	frequency_penalty: 0.3,
+	presence_penalty: 0.1,
+	autoEval: {
+		grammar: undefined,
+		hallucination: undefined,
+		coherence: undefined,
+	},
+	rating: null,
+	userFeedback: null,
+});
+
+export const createErrorTrace = (
+	baseTrace: Partial<IRecipeTrace>,
+	error: unknown
+): IRecipeTrace =>
+	({
+		...baseTrace,
+		postprocessed: null,
+		errorTags: ["parse_failed"],
+		responseType: ["error"],
+		metadata: {
+			...baseTrace.metadata,
+			parseSuccess: false,
+			error: error instanceof Error ? error.message : "Parse failed",
+		},
+	}) as IRecipeTrace;
