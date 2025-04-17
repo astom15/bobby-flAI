@@ -119,9 +119,10 @@ const callGPT = async (input: string) => {
 
 			return parsedContent;
 		} catch (traceErr) {
-			throw Object.assign(Errors.TraceLogging.insertFailed(traceErr), {
-				gptResponse: parsedContent,
-			});
+			throw Errors.TraceLogging.insertFailed(
+				traceErr,
+				JSON.stringify(parsedContent)
+			);
 		}
 	} catch (err) {
 		if (

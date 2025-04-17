@@ -123,7 +123,7 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 			},
 		});
 	} catch (err) {
-		logError(Errors.TraceLogging.insertFailed(err));
+		logError(Errors.TraceLogging.insertFailed(err, fullResponse));
 	}
 	const wandbTrace = {
 		...trace,
@@ -145,7 +145,7 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 				},
 			},
 		});
-		throw Errors.TraceLogging.insertFailed(errorMessage);
+		throw Errors.TraceLogging.insertFailed(errorMessage, fullResponse);
 	}
 }
 export const createBaseTraceData = (

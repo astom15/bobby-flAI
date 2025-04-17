@@ -6,6 +6,14 @@ export interface ErrorContext {
 	operation?: string;
 	[key: string]: unknown;
 }
+
+function formatStackTrace(stack: string): string {
+	return stack
+		.split("\n")
+		.map((line) => line.trim())
+		.join("\n    "); // 4 spaces for standard indentation
+}
+
 export function logError(
 	error: CustomError | Error | unknown,
 	context?: ErrorContext,
@@ -14,7 +22,8 @@ export function logError(
 	const logPayload: Record<string, unknown> = {
 		...context,
 		message: error instanceof Error ? error.message : String(error),
-		stack: error instanceof Error ? error.stack : undefined,
+		stack:
+			error instanceof Error ? formatStackTrace(error.stack || "") : undefined,
 	};
 
 	if (error instanceof CustomError) {

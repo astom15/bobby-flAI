@@ -26,21 +26,22 @@ export const messageResolvers = {
 			} catch (err) {
 				if (err instanceof CustomError) {
 					switch (err.code) {
-						case ErrorCode.MESSAGE_NO_RESPONSE_GENERATED:
-							logError(err);
-							throw err;
 						case ErrorCode.TRACE_LOGGING_FAILED:
 							logError(err);
-							return JSON.stringify(
-								(err as unknown as { gptResponse: string }).gptResponse
-							);
+							return JSON.stringify(err.metadata?.gptResponse);
 						default:
-							logError(Errors.Message.illFormedResponse(err));
-							throw Errors.Message.illFormedResponse(err);
+							logError(err);
+							return JSON.stringify({
+								error: err.message,
+								code: err.code,
+							});
 					}
 				} else {
 					logError(Errors.Message.illFormedResponse(err));
-					throw Errors.Message.illFormedResponse(err);
+					return JSON.stringify({
+						error: "An unexpected error occurred",
+						code: ErrorCode.UNKNOWN_ERROR,
+					});
 				}
 			}
 		},

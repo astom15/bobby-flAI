@@ -5,6 +5,7 @@ const createError = (message: string, options?: Partial<CustomError>) => {
 };
 
 export enum ErrorCode {
+	UNKNOWN_ERROR = "UNKNOWN_ERROR",
 	INTERNAL_ERROR = "INTERNAL_ERROR",
 	// Chat Errors
 	CHAT_CREATE_FAILED = "CHAT_CREATE_FAILED",
@@ -55,7 +56,7 @@ type TraceErrors = {
 };
 
 type TraceLoggingErrors = {
-	insertFailed: (err?: unknown) => CustomError;
+	insertFailed: (err?: unknown, gptResponse?: string) => CustomError;
 };
 
 type ChatErrors = {
@@ -208,11 +209,11 @@ const Errors: {
 			}),
 	},
 	TraceLogging: {
-		insertFailed: (err?: unknown) =>
+		insertFailed: (err?: unknown, gptResponse?: string) =>
 			createError("Failed to insert trace into W&B", {
 				code: ErrorCode.TRACE_LOGGING_FAILED,
 				statusCode: 500,
-				metadata: { error: err },
+				metadata: { error: err, gptResponse },
 			}),
 	},
 	User: {
