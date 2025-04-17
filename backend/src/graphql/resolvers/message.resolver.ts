@@ -7,6 +7,8 @@ import Message, {
 import { callGPT } from "src/services/message.service";
 import Errors from "src/errors/errorFactory";
 import { logError } from "src/services/errorLogger.service";
+import CustomError from "src/errors/CustomError";
+import { ErrorCode } from "src/errors/errorFactory";
 
 // need to set up a redis cache to contextualize previous recipes
 export const messageResolvers = {
@@ -22,14 +24,20 @@ export const messageResolvers = {
 				// console.log(gptResponse);
 				return JSON.stringify(gptResponse);
 			} catch (err) {
-				if (err instanceof Errors.Message.noResponseGenerated) {
-					logError(err);
-					throw err;
-				} else if (err instanceof Errors.TraceLogging.insertFailed) {
-					logError(err);
-					return JSON.stringify(
-						(err as unknown as { gptResponse: string }).gptResponse
-					);
+				if (err instanceof CustomError) {
+					switch (err.code) {
+						case ErrorCode.MESSAGE_NO_RESPONSE_GENERATED:
+							logError(err);
+							throw err;
+						case ErrorCode.TRACE_LOGGING_FAILED:
+							logError(err);
+							return JSON.stringify(
+								(err as unknown as { gptResponse: string }).gptResponse
+							);
+						default:
+							logError(Errors.Message.illFormedResponse(err));
+							throw Errors.Message.illFormedResponse(err);
+					}
 				} else {
 					logError(Errors.Message.illFormedResponse(err));
 					throw Errors.Message.illFormedResponse(err);

@@ -1,18 +1,20 @@
+import { ErrorCode } from "./errorFactory";
+
 class CustomError extends Error {
 	statusCode: number;
-	code: string;
+	code: ErrorCode;
 	metadata?: Record<string, unknown>;
 	originalStack?: string;
 
 	constructor({
 		message,
 		statusCode = 500,
-		code = "INTERNAL_ERROR",
+		code = ErrorCode.INTERNAL_ERROR,
 		metadata,
 	}: {
 		message: string;
 		statusCode?: number;
-		code?: string;
+		code?: ErrorCode;
 		metadata?: Record<string, unknown>;
 	}) {
 		super(message);
@@ -20,7 +22,6 @@ class CustomError extends Error {
 		this.statusCode = statusCode;
 		this.code = code;
 		this.metadata = metadata;
-		this.originalStack = this.stack;
 
 		Object.setPrototypeOf(this, CustomError.prototype);
 	}

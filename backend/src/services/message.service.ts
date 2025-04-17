@@ -17,6 +17,8 @@ import {
 	sanitizeGPTResponse,
 	validateRecipe,
 } from "./recipe.service";
+import CustomError from "src/errors/CustomError";
+import { ErrorCode } from "src/errors/errorFactory";
 dotenv.config();
 
 export enum EIntent {
@@ -122,7 +124,10 @@ const callGPT = async (input: string) => {
 			});
 		}
 	} catch (err) {
-		if (err instanceof Errors.TraceLogging.insertFailed) {
+		if (
+			err instanceof CustomError &&
+			err.code === ErrorCode.TRACE_LOGGING_FAILED
+		) {
 			throw err;
 		}
 		logError(err);

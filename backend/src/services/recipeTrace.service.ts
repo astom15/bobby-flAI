@@ -145,7 +145,7 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 				},
 			},
 		});
-		logError(Errors.TraceLogging.insertFailed(errorMessage));
+		throw Errors.TraceLogging.insertFailed(errorMessage);
 	}
 }
 export const createBaseTraceData = (
