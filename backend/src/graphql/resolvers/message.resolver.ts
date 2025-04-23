@@ -21,16 +21,23 @@ export const messageResolvers = {
 				const gptResponse = await callGPT(input.content);
 				// const { name, prepTime, cookTime, totalTime, ingredients, steps } =
 				// 	gptResponse[0];
-				// console.log(gptResponse);
+				console.log(gptResponse);
+				console.log("-0asdfsdfasdf;kjlh;asdfj;klj");
 				return JSON.stringify(gptResponse);
 			} catch (err) {
 				if (err instanceof CustomError) {
 					switch (err.code) {
 						case ErrorCode.TRACE_LOGGING_FAILED:
-							logError(err);
+							console.log("Metadata:", err.metadata); // Debug log;
+							console.log(
+								"Response to return:",
+								JSON.parse(err.metadata?.gptResponse as string)
+							); // Debug log
+							if (!err.metadata?.gptResponse) {
+								return JSON.stringify({ error: "Invalid response format" });
+							}
 							return JSON.stringify(err.metadata?.gptResponse);
 						default:
-							logError(err);
 							return JSON.stringify({
 								error: err.message,
 								code: err.code,

@@ -79,10 +79,7 @@ const callGPT = async (input: string) => {
 		}
 
 		let parsedContent;
-		try {
-			const sanitizedContent = sanitizeGPTResponse(content);
-			parsedContent = JSON.parse(sanitizedContent);
-		} catch (parseErr) {
+		if (!content) {
 			const baseTrace = createBaseTraceData(
 				sessionId,
 				prompt,
@@ -91,8 +88,27 @@ const callGPT = async (input: string) => {
 				TEMPORARY_SETTINGS,
 				isRecipeRelated
 			);
-			const errorTrace = createErrorTrace(baseTrace, parseErr);
-			await logRecipeTrace(errorTrace);
+			const errorTrace = createErrorTrace(
+				baseTrace,
+				new Error("No response generated")
+			);
+			void logRecipeTrace(errorTrace);
+			throw Errors.Message.noResponseGenerated();
+		}
+		try {
+			parsedContent = JSON.parse(sanitizeGPTResponse(content));
+			console.log(parsedContent);
+		} catch (parseErr) {
+			// const baseTrace = createBaseTraceData(
+			// 	sessionId,
+			// 	prompt,
+			// 	response,
+			// 	startTime,
+			// 	TEMPORARY_SETTINGS,
+			// 	isRecipeRelated
+			// );
+			// const errorTrace = createErrorTrace(baseTrace, parseErr);
+			// void logRecipeTrace(errorTrace);
 			throw Errors.Message.parseFailed(parseErr);
 		}
 

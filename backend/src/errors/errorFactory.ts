@@ -5,8 +5,10 @@ const createError = (message: string, options?: Partial<CustomError>) => {
 };
 
 export enum ErrorCode {
+	// General Errors
 	UNKNOWN_ERROR = "UNKNOWN_ERROR",
 	INTERNAL_ERROR = "INTERNAL_ERROR",
+	JSON_REPAIR_FAILED = "JSON_REPAIR_FAILED",
 	// Chat Errors
 	CHAT_CREATE_FAILED = "CHAT_CREATE_FAILED",
 	CHAT_NOT_FOUND = "CHAT_NOT_FOUND",
@@ -84,8 +86,13 @@ type MessageErrors = {
 	illFormedResponse: (err?: unknown) => CustomError;
 };
 
+type JSONRepairErrors = {
+	repairFailed: (err?: unknown) => CustomError;
+};
+
 const Errors: {
 	Chat: ChatErrors;
+	JSONRepair: JSONRepairErrors;
 	Message: MessageErrors;
 	S3: S3Errors;
 	Trace: TraceErrors;
@@ -120,6 +127,14 @@ const Errors: {
 		deleteFailed: (err?: unknown) =>
 			createError("Failed to delete chat", {
 				code: ErrorCode.CHAT_DELETE_FAILED,
+				statusCode: 500,
+				metadata: { error: err },
+			}),
+	},
+	JSONRepair: {
+		repairFailed: (err?: unknown) =>
+			createError("Failed to repair JSON", {
+				code: ErrorCode.JSON_REPAIR_FAILED,
 				statusCode: 500,
 				metadata: { error: err },
 			}),
@@ -213,7 +228,10 @@ const Errors: {
 			createError("Failed to insert trace into W&B", {
 				code: ErrorCode.TRACE_LOGGING_FAILED,
 				statusCode: 500,
-				metadata: { error: err, gptResponse },
+				metadata: {
+					error: err instanceof Error ? err.message : String(err),
+					gptResponse,
+				},
 			}),
 	},
 	User: {
