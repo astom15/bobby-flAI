@@ -101,37 +101,36 @@ export async function logRecipeTrace(trace: Partial<IRecipeTrace>) {
 		trace.responseUrl = `${process.env.RESPONSE_FOLDER}${traceId}.txt`;
 		trace.prompt = trace.prompt.slice(0, 200);
 		trace.response = trace.response.slice(0, 200);
+		await prisma.recipeTrace.create({
+			data: {
+				sessionId: trace.sessionId,
+				traceId,
+				prompt: trace.prompt,
+				promptUrl: trace.promptUrl ?? null,
+				model: trace.model,
+				response: trace.response,
+				responseUrl: trace.responseUrl,
+				postprocessed: postprocessed ?? null,
+				temperature: trace.temperature,
+				promptTokens,
+				completionTokens,
+				totalTokens,
+				responseTimeMs: trace.responseTimeMs,
+				retryCount: retryCount,
+				autoEval,
+				metadata,
+				rating,
+				userFeedback: trace.userFeedback ?? null,
+				errorTags,
+			},
+		});
 		const wandbTrace = {
 			...trace,
+			traceId,
 			prompt: fullPrompt,
 			response: fullResponse,
 		};
-		await Promise.all([
-			prisma.recipeTrace.create({
-				data: {
-					sessionId: trace.sessionId,
-					traceId,
-					prompt: trace.prompt,
-					promptUrl: trace.promptUrl ?? null,
-					model: trace.model,
-					response: trace.response,
-					responseUrl: trace.responseUrl,
-					postprocessed: postprocessed ?? null,
-					temperature: trace.temperature,
-					promptTokens,
-					completionTokens,
-					totalTokens,
-					responseTimeMs: trace.responseTimeMs,
-					retryCount: retryCount,
-					autoEval,
-					metadata,
-					rating,
-					userFeedback: trace.userFeedback ?? null,
-					errorTags,
-				},
-			}),
-			axios.post(`${WANDB_SERVICE_URL}/log-trace`, wandbTrace),
-		]);
+		axios.post(`${WANDB_SERVICE_URL}/log-trace`, wandbTrace);
 	} catch (err: unknown) {
 		const errorMessage =
 			err instanceof Error ? err.message : "Error generating response";

@@ -9,6 +9,7 @@ import Errors from "src/errors/errorFactory";
 import { logError } from "src/services/errorLogger.service";
 import CustomError from "src/errors/CustomError";
 import { ErrorCode } from "src/errors/errorFactory";
+import Chat, { ChatStatus } from "src/models/Chat";
 
 // need to set up a redis cache to contextualize previous recipes
 export const messageResolvers = {
@@ -16,23 +17,36 @@ export const messageResolvers = {
 		handleMessage: async (
 			_parent: unknown,
 			{ input }: { input: IMessageInput }
-		): Promise<string> => {
+		): Promise<IMessage | string> => {
 			try {
 				const gptResponse = await callGPT(input.content);
-				// const { name, prepTime, cookTime, totalTime, ingredients, steps } =
-				// 	gptResponse[0];
-				console.log(gptResponse);
-				console.log("-0asdfsdfasdf;kjlh;asdfj;klj");
-				return JSON.stringify(gptResponse);
+				const message = new Message({
+					chatId: input.chatId,
+					sender: input.sender,
+					content: JSON.stringify(gptResponse),
+				});
+				await message.save();
+				// need to generate a name for the chat
+				await Chat.findOneAndUpdate(
+					{ _id: input.chatId },
+					{ status: ChatStatus.ACTIVE },
+					{ new: true }
+				);
+
+				const messageObj = message.toObject();
+				return {
+					...messageObj,
+					id: messageObj._id,
+				} as IMessage;
 			} catch (err) {
 				if (err instanceof CustomError) {
 					switch (err.code) {
 						case ErrorCode.TRACE_LOGGING_FAILED:
-							console.log("Metadata:", err.metadata); // Debug log;
+							console.log("Metadata:", err.metadata);
 							console.log(
 								"Response to return:",
 								JSON.parse(err.metadata?.gptResponse as string)
-							); // Debug log
+							);
 							if (!err.metadata?.gptResponse) {
 								return JSON.stringify({ error: "Invalid response format" });
 							}
@@ -44,7 +58,7 @@ export const messageResolvers = {
 							});
 					}
 				} else {
-					logError(Errors.Message.illFormedResponse(err));
+					console.error("AxiosError caught in else block:", err);
 					return JSON.stringify({
 						error: "An unexpected error occurred",
 						code: ErrorCode.UNKNOWN_ERROR,

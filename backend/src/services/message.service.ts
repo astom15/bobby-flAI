@@ -96,8 +96,10 @@ const callGPT = async (input: string) => {
 			throw Errors.Message.noResponseGenerated();
 		}
 		try {
+			console.log("content", content);
+			console.log("JSON PARSED", JSON.parse(content));
 			parsedContent = JSON.parse(sanitizeGPTResponse(content));
-			console.log(parsedContent);
+			console.log("parsedContent", parsedContent);
 		} catch (parseErr) {
 			// const baseTrace = createBaseTraceData(
 			// 	sessionId,
