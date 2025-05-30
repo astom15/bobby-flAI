@@ -19,7 +19,11 @@ import {
 } from "./recipe.service";
 import CustomError from "src/errors/CustomError";
 import { ErrorCode } from "src/errors/errorFactory";
+import axios from "axios";
 dotenv.config();
+
+const WANDB_SERVICE_URL =
+	process.env.WANDB_SERVICE_URL || "http://localhost:8000";
 
 export enum EIntent {
 	RECIPE_REQUEST = "RECIPE_REQUEST",
@@ -96,21 +100,68 @@ const callGPT = async (input: string) => {
 			throw Errors.Message.noResponseGenerated();
 		}
 		try {
-			console.log("content", content);
-			console.log("JSON PARSED", JSON.parse(content));
-			parsedContent = JSON.parse(sanitizeGPTResponse(content));
-			console.log("parsedContent", parsedContent);
+			console.log("Raw GPT content:", {
+				content,
+				length: content.length,
+				type: typeof content,
+				firstChars: content.slice(0, 100),
+				lastChars: content.slice(-100),
+			});
+
+			// Validate JSON with weave service
+			try {
+				await axios.post(`${WANDB_SERVICE_URL}/validate-json`, {
+					content,
+					sessionId,
+					traceId: uuidv4(),
+					metadata: {
+						intent: isRecipeRelated,
+						userSettings: TEMPORARY_SETTINGS,
+						timestamp: new Date().toISOString(),
+					},
+				});
+			} catch (validationErr) {
+				logError(Errors.Message.parseFailed(validationErr));
+				throw Errors.Message.parseFailed(validationErr);
+			}
+
+			const sanitizedContent = sanitizeGPTResponse(content);
+			console.log("Sanitized content:", {
+				content: sanitizedContent,
+				length: sanitizedContent.length,
+				changes: {
+					originalLength: content.length,
+					sanitizedLength: sanitizedContent.length,
+					diff: content.length - sanitizedContent.length,
+				},
+			});
+			parsedContent = JSON.parse(sanitizedContent);
+			console.log("Successfully parsed content:", {
+				type: Array.isArray(parsedContent) ? "array" : typeof parsedContent,
+				length: Array.isArray(parsedContent) ? parsedContent.length : "N/A",
+				firstItem: Array.isArray(parsedContent)
+					? parsedContent[0]
+					: parsedContent,
+			});
 		} catch (parseErr) {
-			// const baseTrace = createBaseTraceData(
-			// 	sessionId,
-			// 	prompt,
-			// 	response,
-			// 	startTime,
-			// 	TEMPORARY_SETTINGS,
-			// 	isRecipeRelated
-			// );
-			// const errorTrace = createErrorTrace(baseTrace, parseErr);
-			// void logRecipeTrace(errorTrace);
+			console.error("Parse error details:", {
+				error: parseErr instanceof Error ? parseErr.message : String(parseErr),
+				rawContent: content,
+				contentLength: content.length,
+				contentType: typeof content,
+				firstChars: content.slice(0, 100),
+				lastChars: content.slice(-100),
+			});
+			const baseTrace = createBaseTraceData(
+				sessionId,
+				prompt,
+				response,
+				startTime,
+				TEMPORARY_SETTINGS,
+				isRecipeRelated
+			);
+			const errorTrace = createErrorTrace(baseTrace, parseErr);
+			void logRecipeTrace(errorTrace);
 			throw Errors.Message.parseFailed(parseErr);
 		}
 

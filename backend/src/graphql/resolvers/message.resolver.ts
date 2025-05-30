@@ -20,6 +20,7 @@ export const messageResolvers = {
 		): Promise<IMessage | string> => {
 			try {
 				const gptResponse = await callGPT(input.content);
+				console.log("gptResponse", gptResponse);
 				const message = new Message({
 					chatId: input.chatId,
 					sender: input.sender,
@@ -58,6 +59,7 @@ export const messageResolvers = {
 							});
 					}
 				} else {
+					logError(Errors.Message.illFormedResponse(err));
 					console.error("AxiosError caught in else block:", err);
 					return JSON.stringify({
 						error: "An unexpected error occurred",
